@@ -11,6 +11,7 @@ import AuthProvider from "./Pages/Authentication/AuthProvider";
 import Friends from "./Pages/Friends/Friends";
 import CreatePage from "./Pages/Create/CreatePage";
 import Post from "./Pages/Home/Post";
+import Profile from "./Pages/Profile/Profile";
 const router = createBrowserRouter([
 	{
 		path: "/",
@@ -39,6 +40,10 @@ const router = createBrowserRouter([
 			{
 				path: "/create",
 				element: <CreatePage></CreatePage>,
+			},
+			{
+				path: "/profile",
+				element: <Profile></Profile>,
 			},
 			{
 				path: "/post/:id",
