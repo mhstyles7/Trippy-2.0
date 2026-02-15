@@ -17,9 +17,7 @@ export default function Friends() {
 	const fetchSuggestions = async () => {
 		setLoading(true);
 		try {
-			const res = await axios.get(
-				`http://localhost:3000/friend-suggestions/${userId}`
-			);
+			const res = await axios.get(`http://localhost:3000/friend-suggestions/${userId}`);
 			setSuggestions(res.data);
 		} catch (err) {
 			setErrorMessage("Error fetching suggestions");
@@ -29,109 +27,71 @@ export default function Friends() {
 	};
 
 	const fetchReceivedRequests = async () => {
-		setLoading(true);
 		try {
-			const res = await axios.get(
-				`http://localhost:3000/received-requests/${userId}`
-			);
+			const res = await axios.get(`http://localhost:3000/received-requests/${userId}`);
 			setReceivedRequests(res.data);
 		} catch (err) {
 			setErrorMessage("Error fetching received requests");
-		} finally {
-			setLoading(false);
 		}
 	};
 
 	const fetchSentRequests = async () => {
-		setLoading(true);
 		try {
-			const res = await axios.get(
-				`http://localhost:3000/sent-requests/${userId}`
-			);
+			const res = await axios.get(`http://localhost:3000/sent-requests/${userId}`);
 			setSentRequests(res.data);
 		} catch (err) {
 			setErrorMessage("Error fetching sent requests");
-		} finally {
-			setLoading(false);
 		}
 	};
 
 	const fetchFriends = async () => {
-		setLoading(true);
 		try {
-			const res = await axios.get(
-				`http://localhost:3000/friends/${userId}`
-			);
+			const res = await axios.get(`http://localhost:3000/friends/${userId}`);
 			setFriends(res.data);
 		} catch (err) {
 			setErrorMessage("Error fetching friends");
-		} finally {
-			setLoading(false);
 		}
 	};
 
 	const sendFriendRequest = async (receiverId) => {
-		setLoading(true);
 		try {
-			await axios.post("http://localhost:3000/friend-request", {
-				senderId: userId,
-				receiverId,
-			});
-			setSuccessMessage("Friend request sent");
+			await axios.post("http://localhost:3000/friend-request", { senderId: userId, receiverId });
+			setSuccessMessage("Friend request sent! 🎉");
 			fetchSuggestions();
 			fetchSentRequests();
 		} catch (err) {
 			setErrorMessage("Error sending friend request");
-		} finally {
-			setLoading(false);
 		}
 	};
 
 	const acceptRequest = async (senderId) => {
-		setLoading(true);
 		try {
-			await axios.post("http://localhost:3000/accept-request", {
-				userId,
-				senderId,
-			});
-			setSuccessMessage("Friend request accepted");
+			await axios.post("http://localhost:3000/accept-request", { userId, senderId });
+			setSuccessMessage("Friend request accepted! 🤝");
 			fetchReceivedRequests();
+			fetchFriends();
 		} catch (err) {
 			setErrorMessage("Error accepting request");
-		} finally {
-			setLoading(false);
 		}
 	};
 
 	const rejectRequest = async (requesterId) => {
-		setLoading(true);
 		try {
-			await axios.post("http://localhost:3000/reject-request", {
-				userId,
-				requesterId,
-			});
-			setSuccessMessage("Friend request rejected");
+			await axios.post("http://localhost:3000/reject-request", { userId, requesterId });
+			setSuccessMessage("Request declined");
 			fetchReceivedRequests();
 		} catch (err) {
 			setErrorMessage("Error rejecting request");
-		} finally {
-			setLoading(false);
 		}
 	};
 
 	const removeFriend = async (friendId) => {
-		setLoading(true);
 		try {
-			await axios.post(`http://localhost:3000/remove-friend`, {
-				userId,
-				friendId,
-			});
+			await axios.post("http://localhost:3000/remove-friend", { userId, friendId });
 			setSuccessMessage("Friend removed");
 			fetchFriends();
 		} catch (err) {
 			setErrorMessage("Error removing friend");
-		} finally {
-			setLoading(false);
 		}
 	};
 
@@ -146,183 +106,174 @@ export default function Friends() {
 		}
 	}, [userId]);
 
+	useEffect(() => {
+		if (successMessage || errorMessage) {
+			const timer = setTimeout(() => { setSuccessMessage(""); setErrorMessage(""); }, 3000);
+			return () => clearTimeout(timer);
+		}
+	}, [successMessage, errorMessage]);
+
 	return (
-		<div className="min-h-screen bg-gray-100 p-4">
-			<div className="max-w-4xl mx-auto">
-				<h1 className="text-3xl font-bold text-center text-indigo-600 mb-4">
-					Friends Dashboard
-				</h1>
+		<div className="min-h-screen p-4 md:p-8 animate-slide-up">
+			<div className="max-w-6xl mx-auto">
+				{/* Header */}
+				<div className="text-center mb-12">
+					<h1 className="section-title">Friends Dashboard</h1>
+					<p className="text-base-content/50 text-lg">Connect with travelers around the globe</p>
+				</div>
 
+				{/* Alerts */}
 				{errorMessage && (
-					<div className="bg-red-100 text-red-600 p-2 rounded mb-4">
-						{errorMessage}
+					<div className="alert alert-error mb-6 animate-slide-down glass-panel border-error/20">
+						<svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+						<span>{errorMessage}</span>
 					</div>
 				)}
-
 				{successMessage && (
-					<div className="bg-green-100 text-green-600 p-2 rounded mb-4">
-						{successMessage}
+					<div className="alert alert-success mb-6 animate-slide-down glass-panel border-success/20">
+						<svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+						<span>{successMessage}</span>
 					</div>
 				)}
 
-				<div className="bg-white p-4 rounded-lg shadow-md mb-6">
-					<h2 className="text-xl font-semibold text-indigo-600 mb-2">
-						Friend Suggestions
+				{/* Suggestions */}
+				<section className="mb-10">
+					<h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+						<span className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-lg">✨</span>
+						People You May Know
 					</h2>
-					{loading && <div>Loading...</div>}
-					{suggestions.length > 0 ? (
-						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-							{suggestions.map((suggestion) => (
-								<div
-									key={suggestion._id}
-									className="bg-gray-50 p-4 rounded-lg shadow"
-								>
-									<div className="text-center mb-2">
-										<img
-											src={
-												suggestion.photoURL ||
-												"https://via.placeholder.com/150"
-											}
-											alt={suggestion.name}
-											className="w-16 h-16 rounded-full mx-auto mb-2"
-										/>
-										<p className="text-gray-700 font-semibold">
-											{suggestion.name}
-										</p>
+					<div className="glass-panel p-6 rounded-2xl">
+						{loading && <div className="flex justify-center py-8"><span className="loading loading-infinity loading-lg text-primary"></span></div>}
+						{suggestions.length > 0 ? (
+							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+								{suggestions.map((s) => (
+									<div key={s._id} className="glass-card p-5 flex flex-col items-center text-center group">
+										<div className="avatar mb-3">
+											<div className="w-20 h-20 rounded-full ring-2 ring-primary/30 ring-offset-base-100 ring-offset-2 group-hover:ring-primary transition-all">
+												<img src={s.photoURL || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"} alt={s.name} />
+											</div>
+										</div>
+										<h3 className="font-bold text-sm mb-1">{s.name}</h3>
+										<p className="text-xs text-base-content/40 mb-4">Traveler</p>
+										<button className="btn btn-primary btn-sm btn-gradient btn-block" onClick={() => sendFriendRequest(s._id)}>
+											Add Friend
+										</button>
 									</div>
-									<button
-										className="bg-blue-500 text-white px-4 py-2 rounded w-full hover:bg-blue-600"
-										onClick={() =>
-											sendFriendRequest(suggestion._id)
-										}
-									>
-										Send Friend Request
-									</button>
+								))}
+							</div>
+						) : !loading && (
+							<div className="text-center py-12">
+								<span className="text-4xl block mb-3">🌐</span>
+								<p className="text-base-content/40">No suggestions available at the moment.</p>
+							</div>
+						)}
+					</div>
+				</section>
+
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+					{/* Received Requests */}
+					<section>
+						<h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+							<span className="w-10 h-10 rounded-xl bg-secondary/20 flex items-center justify-center text-lg">📩</span>
+							Received Requests
+							{receivedRequests.length > 0 && <span className="badge badge-secondary badge-sm">{receivedRequests.length}</span>}
+						</h2>
+						<div className="glass-panel p-6 rounded-2xl min-h-[280px]">
+							{receivedRequests.length > 0 ? (
+								<div className="space-y-3">
+									{receivedRequests.map((r) => (
+										<div key={r._id} className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors">
+											<div className="flex items-center gap-4">
+												<div className="avatar">
+													<div className="w-12 h-12 rounded-full ring-1 ring-white/10">
+														<img src={r.photoURL || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"} alt={r.name} />
+													</div>
+												</div>
+												<span className="font-bold text-sm">{r.name}</span>
+											</div>
+											<div className="flex gap-2">
+												<button className="btn btn-success btn-circle btn-sm text-white hover:shadow-lg hover:shadow-success/20" onClick={() => acceptRequest(r._id)} title="Accept">
+													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+												</button>
+												<button className="btn btn-error btn-circle btn-sm text-white hover:shadow-lg hover:shadow-error/20" onClick={() => rejectRequest(r._id)} title="Reject">
+													<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+												</button>
+											</div>
+										</div>
+									))}
 								</div>
-							))}
+							) : (
+								<div className="flex flex-col items-center justify-center h-full py-10">
+									<span className="text-3xl mb-2">📭</span>
+									<p className="text-base-content/40 text-sm">No pending requests</p>
+								</div>
+							)}
 						</div>
-					) : (
-						<p className="text-gray-600">
-							No suggestions available
-						</p>
-					)}
+					</section>
+
+					{/* Friends List */}
+					<section>
+						<h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
+							<span className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-lg">👥</span>
+							Your Friends
+							{friends.length > 0 && <span className="badge badge-accent badge-sm">{friends.length}</span>}
+						</h2>
+						<div className="glass-panel p-6 rounded-2xl min-h-[280px]">
+							{friends.length > 0 ? (
+								<div className="space-y-3">
+									{friends.map((f) => (
+										<div key={f._id} className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors">
+											<div className="flex items-center gap-4">
+												<div className="avatar">
+													<div className="w-12 h-12 rounded-full ring-1 ring-accent/30">
+														<img src={f.photoURL || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"} alt={f.name} />
+													</div>
+												</div>
+												<div>
+													<span className="font-bold text-sm block">{f.name}</span>
+													<span className="text-xs text-base-content/30">Online</span>
+												</div>
+											</div>
+											<button className="btn btn-ghost btn-xs text-error/60 hover:text-error hover:bg-error/10" onClick={() => removeFriend(f._id)}>Unfriend</button>
+										</div>
+									))}
+								</div>
+							) : (
+								<div className="flex flex-col items-center justify-center h-full py-10">
+									<span className="text-3xl mb-2">🌏</span>
+									<p className="text-base-content/40 text-sm">Start connecting with travelers!</p>
+								</div>
+							)}
+						</div>
+					</section>
 				</div>
 
-				<div className="bg-white p-4 rounded-lg shadow-md mb-6">
-					<h2 className="text-xl font-semibold text-indigo-600 mb-2">
-						Received Friend Requests
-					</h2>
-					{loading && <div>Loading...</div>}
-					{receivedRequests.length > 0 ? (
-						receivedRequests.map((request) => (
-							<div
-								key={request._id}
-								className="flex justify-between items-center p-4 border-b"
-							>
-								<div className="flex items-center space-x-4">
-									<img
-										src={
-											request.photoURL ||
-											"https://via.placeholder.com/150"
-										}
-										alt={request.name}
-										className="w-12 h-12 rounded-full"
-									/>
-									<p className="text-gray-700 font-semibold">
-										{request.name}
-									</p>
-								</div>
-								<div>
-									<button
-										className="bg-green-500 text-white px-4 py-2 rounded mr-2 hover:bg-green-600"
-										onClick={() =>
-											acceptRequest(request._id)
-										}
-									>
-										Accept
-									</button>
-									<button
-										className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-										onClick={() =>
-											rejectRequest(request._id)
-										}
-									>
-										Reject
-									</button>
-								</div>
+				{/* Sent Requests */}
+				<div className="collapse collapse-arrow glass-panel rounded-2xl border border-white/[0.06]">
+					<input type="checkbox" />
+					<div className="collapse-title text-lg font-bold flex items-center gap-3">
+						📤 Sent Requests
+						<span className="badge badge-outline badge-sm">{sentRequests.length}</span>
+					</div>
+					<div className="collapse-content">
+						{sentRequests.length > 0 ? (
+							<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+								{sentRequests.map((r) => (
+									<div key={r._id} className="flex items-center gap-3 p-3 bg-white/[0.03] rounded-xl">
+										<div className="avatar">
+											<div className="w-8 h-8 rounded-full">
+												<img src={r.photoURL || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"} alt={r.name} />
+											</div>
+										</div>
+										<span className="text-sm font-medium">{r.name}</span>
+										<span className="ml-auto text-xs text-base-content/30">Pending</span>
+									</div>
+								))}
 							</div>
-						))
-					) : (
-						<p className="text-gray-600">No received requests</p>
-					)}
-				</div>
-
-				<div className="bg-white p-4 rounded-lg shadow-md mb-6">
-					<h2 className="text-xl font-semibold text-indigo-600 mb-2">
-						Sent Friend Requests
-					</h2>
-					{loading && <div>Loading...</div>}
-					{sentRequests.length > 0 ? (
-						sentRequests.map((request) => (
-							<div
-								key={request._id}
-								className="flex items-center p-4 border-b"
-							>
-								<div className="flex items-center space-x-4">
-									<img
-										src={
-											request.photoURL ||
-											"https://via.placeholder.com/150"
-										}
-										alt={request.name}
-										className="w-12 h-12 rounded-full"
-									/>
-									<p className="text-gray-700 font-semibold">
-										{request.name}
-									</p>
-								</div>
-							</div>
-						))
-					) : (
-						<p className="text-gray-600">No sent requests</p>
-					)}
-				</div>
-
-				<div className="bg-white p-4 rounded-lg shadow-md mb-6">
-					<h2 className="text-xl font-semibold text-indigo-600 mb-2">
-						Your Friends
-					</h2>
-					{loading && <div>Loading...</div>}
-					{friends.length > 0 ? (
-						friends.map((friend) => (
-							<div
-								key={friend._id}
-								className="flex items-center p-4 border-b"
-							>
-								<div className="flex items-center space-x-4">
-									<img
-										src={
-											friend.photoURL ||
-											"https://via.placeholder.com/150"
-										}
-										alt={friend.name}
-										className="w-12 h-12 rounded-full"
-									/>
-									<p className="text-gray-700 font-semibold">
-										{friend.name}
-									</p>
-								</div>
-								<button
-									className="ml-auto bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-									onClick={() => removeFriend(friend._id)}
-								>
-									Remove Friend
-								</button>
-							</div>
-						))
-					) : (
-						<p className="text-gray-600">You have no friends yet</p>
-					)}
+						) : (
+							<p className="text-sm text-base-content/40 mt-2">No pending sent requests.</p>
+						)}
+					</div>
 				</div>
 			</div>
 		</div>
