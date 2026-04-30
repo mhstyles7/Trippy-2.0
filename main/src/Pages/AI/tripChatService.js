@@ -53,8 +53,8 @@ const generateWithFallback = async (requestFn) => {
 // Platform pages for navigation guidance
 export const PLATFORM_PAGES = {
     home: { name: 'Home', path: '/', description: 'Main landing page with travel posts and featured adventures' },
-    login: { name: 'Login', path: '/login', description: 'Sign in to your Trippy account' },
-    register: { name: 'Register', path: '/register', description: 'Create a new Trippy account as a Traveler or Rental Provider' },
+    login: { name: 'Login', path: '/login', description: 'Sign in to your Trippy 2.0 account' },
+    register: { name: 'Register', path: '/register', description: 'Create a new Trippy 2.0 account as a Traveler or Rental Provider' },
     friends: { name: 'Friends', path: '/friends', description: 'Connect with fellow travelers, send and manage friend requests' },
     create: { name: 'Create Post', path: '/create', description: 'Share your travel adventures with photos and stories' },
     profile: { name: 'Profile', path: '/profile', description: 'View your profile, posts, and account details' },
@@ -81,7 +81,7 @@ const buildSystemPrompt = (userContext) => {
         personalizedInfo += `\n\nUSER'S CURRENT PAGE: ${PLATFORM_PAGES[currentPage].name}`;
     }
 
-    return `You are Trippy, an enthusiastic and knowledgeable AI travel assistant for the Trippy platform — a traveling community social media and tour management system.
+    return `You are Trippy 2.0, a professional, enthusiastic, and knowledgeable AI travel assistant for the Trippy 2.0 platform — a traveling community social media and tour management system.
 
 YOUR CORE CAPABILITIES:
 1. **Travel Recommendations**: Suggest destinations, packing tips, itinerary ideas, budget travel advice
@@ -100,7 +100,7 @@ AVAILABLE PLATFORM PAGES:
 - Register (/register): Create a new account (Traveler or Car Rental Provider)
 
 NAVIGATION GUIDANCE:
-When users want to go somewhere, say: "Head to **[Page Name]** — you'll find it in the navigation bar at the top! 🧭"
+When users want to go somewhere, say: "Head to **[Page Name]** — you'll find it in the navigation bar at the top!"
 
 TRIPPY FEATURES:
 - Social travel posts with photos and comments
@@ -118,12 +118,13 @@ TRAVEL KNOWLEDGE:
 ${personalizedInfo}
 
 RESPONSE STYLE:
-- Friendly, enthusiastic, use emojis ✈️🌍🏖️⛰️
+- Friendly, professional, and clear
+- **CRITICAL: DO NOT use any emojis in your responses.** Use professional language and formatting (bold, lists) for emphasis instead.
 - Concise (2-4 sentences) but informative
 - Personalize based on user context
 - Ask engaging follow-up questions
 - For navigation, give CLEAR directions
-- Name is "Trippy" — never use any other name`;
+- Name is "Trippy 2.0" — never use any other name`;
 };
 
 // Detect navigation intent
@@ -163,7 +164,7 @@ export const getAIResponse = async (userMessage, userContext = {}, conversationH
     try {
         const recentHistory = conversationHistory.slice(-6);
         const conversationText = recentHistory
-            .map(msg => `${msg.isUser ? 'User' : 'Trippy'}: ${msg.text}`)
+            .map(msg => `${msg.isUser ? 'User' : 'Trippy 2.0'}: ${msg.text}`)
             .join('\n');
 
         const systemPrompt = buildSystemPrompt(userContext);
@@ -172,7 +173,7 @@ export const getAIResponse = async (userMessage, userContext = {}, conversationH
 
 ${conversationText ? `CONVERSATION HISTORY:\n${conversationText}\n\n` : ''}User: ${userMessage}
 
-Remember: Be personalized, offer navigation help, keep conversation context, be engaging.`;
+Remember: Be personalized, offer navigation help, keep conversation context, be engaging, and AVOID EMOJIS.`;
 
         const result = await generateWithFallback((model) =>
             model.generateContent({
@@ -207,34 +208,34 @@ const getFallbackResponse = (userMessage, userContext = {}) => {
     const navPage = detectNavigationIntent(msg);
     if (navPage && PLATFORM_PAGES[navPage]) {
         const p = PLATFORM_PAGES[navPage];
-        return `You can find **${p.name}** in the navigation menu at the top! 👆 Click on it to ${p.description.toLowerCase()}. Want to know more about what you can do there?`;
+        return `You can find **${p.name}** in the navigation menu at the top. Click on it to ${p.description.toLowerCase()}. Would you like to know more about the features available there?`;
     }
 
     if (msg.includes('beach') || msg.includes('ocean') || msg.includes('sea')) {
-        return `🏖️ Nothing beats a beach getaway! Popular picks: Bali, Maldives, Phuket, and Cox's Bazar. ${name ? `${name}, what's` : "What's"} your vibe — relaxation or water sports?`;
+        return `Nothing beats a beach getaway. Popular destinations include Bali, Maldives, Phuket, and Cox's Bazar. ${name ? `${name}, what` : "What"} kind of experience are you looking for — relaxation or water sports?`;
     }
 
     if (msg.includes('mountain') || msg.includes('hill') || msg.includes('trek') || msg.includes('hike')) {
-        return `⛰️ Mountains are calling! Try the Swiss Alps, Patagonia, Bandarban, or Nepal's Annapurna Circuit. ${name ? `${name}, are` : "Are"} you into easy trails or challenging treks?`;
+        return `The mountains offer incredible experiences. Consider exploring the Swiss Alps, Patagonia, Bandarban, or the Annapurna Circuit in Nepal. ${name ? `${name}, are` : "Are"} you interested in beginner-friendly trails or more challenging treks?`;
     }
 
     if (msg.includes('budget') || msg.includes('cheap') || msg.includes('save')) {
-        return `💰 Great budget tips: travel offseason, use local transport, eat street food, and book hostels! Southeast Asia and South America are amazing for budget travelers. Want specific tips?`;
+        return `For budget-friendly travel, consider traveling during the off-season, using local transport, exploring street food, and booking highly-rated hostels. Southeast Asia and South America are particularly great for budget travelers. Would you like more specific tips?`;
     }
 
     if (msg.includes('hello') || msg.includes('hi') || msg.includes('hey') || msg.includes('yo')) {
-        return `Hey${name ? ` ${name}` : ''}! 👋 I'm Trippy, your AI travel buddy! I can help with destination ideas, travel tips, or navigating the platform. What's on your mind? ✈️`;
+        return `Hello${name ? ` ${name}` : ''}! I'm Trippy 2.0, your AI travel assistant. I can help you with destination ideas, travel tips, or navigating our platform. How can I assist you today?`;
     }
 
     if (msg.includes('help') || msg.includes('what can you')) {
-        return `I'm here to help with:\n🗺️ Destination recommendations\n🧭 Platform navigation\n👥 Features like Friends & Posts\n💡 Travel tips & advice\n\nWhat interests you${name ? `, ${name}` : ''}? 🌍`;
+        return `I can assist you with:\n- Destination recommendations\n- Platform navigation\n- Understanding features like Friends and Posts\n- Travel tips and professional advice\n\nWhat would you like to explore${name ? `, ${name}` : ''}?`;
     }
 
     if (msg.includes('thank')) {
-        return `You're welcome${name ? `, ${name}` : ''}! 😊 Happy travels! Anything else I can help with?`;
+        return `You're very welcome${name ? `, ${name}` : ''}! I'm happy to help. Is there anything else you'd like to discuss?`;
     }
 
-    return `Great question! 🌟 I can help you discover amazing destinations, share travel tips, or guide you through Trippy's features. What excites you most${name ? `, ${name}` : ''}? ✈️🌍`;
+    return `That's a great topic. I can help you discover amazing destinations, share professional travel tips, or guide you through the various features of the Trippy 2.0 platform. What are you most interested in${name ? `, ${name}` : ''}?`;
 };
 
 export { getFallbackResponse };

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { Plane, Plus, ChevronDown, Globe, Camera, Map, Star, Users, Car, Bot, CheckCircle, Palmtree } from "lucide-react";
 
 const Home = () => {
 	const [posts, setPosts] = useState([]);
@@ -33,7 +34,9 @@ const Home = () => {
 
 				<div className="relative z-10 max-w-6xl mx-auto text-center">
 					<div className="animate-slide-up">
-						<p className="text-primary font-semibold tracking-widest uppercase text-sm mb-4">✈️ Your Travel Companion</p>
+						<p className="text-primary font-semibold tracking-widest uppercase text-sm mb-4 flex items-center justify-center gap-2">
+							<Plane size={16} /> Your Travel Companion
+						</p>
 						<h1 className="hero-title mb-6">
 							Explore the<br />
 							<span className="text-glow">World Together</span>
@@ -45,7 +48,7 @@ const Home = () => {
 						<div className="flex flex-wrap justify-center gap-4 mb-16">
 							{isLoggedIn ? (
 								<Link to="/create" className="btn btn-lg btn-gradient btn-glow gap-2 px-8 shadow-2xl shadow-primary/20">
-									<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+									<Plus size={20} />
 									Share Your Journey
 								</Link>
 							) : (
@@ -54,7 +57,7 @@ const Home = () => {
 								</Link>
 							)}
 							<a href="#feed" className="btn btn-lg btn-outline border-white/10 hover:bg-white/5 gap-2">
-								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 5.25l-7.5 7.5-7.5-7.5m15 6l-7.5 7.5-7.5-7.5" /></svg>
+								<ChevronDown size={20} />
 								Explore Feed
 							</a>
 						</div>
@@ -63,15 +66,15 @@ const Home = () => {
 					{/* Stats Row */}
 					<div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto animate-slide-up" style={{ animationDelay: '0.2s' }}>
 						{[
-							{ label: "Travelers", value: "2K+", icon: "🌍" },
-							{ label: "Adventures", value: `${posts.length || "50"}+`, icon: "📸" },
-							{ label: "Countries", value: "30+", icon: "🗺️" },
-							{ label: "5-Star Reviews", value: "500+", icon: "⭐" },
+							{ label: "Travelers", value: "2K+", icon: <Globe size={24} className="text-primary" /> },
+							{ label: "Adventures", value: `${posts.length || "50"}+`, icon: <Camera size={24} className="text-secondary" /> },
+							{ label: "Countries", value: "30+", icon: <Map size={24} className="text-accent" /> },
+							{ label: "5-Star Reviews", value: "500+", icon: <Star size={24} className="text-warning" /> },
 						].map((stat, i) => (
-							<div key={i} className="stat-card rounded-2xl">
-								<span className="text-2xl">{stat.icon}</span>
+							<div key={i} className="stat-card rounded-2xl flex flex-col items-center gap-2 p-4">
+								<div className="mb-1">{stat.icon}</div>
 								<span className="text-2xl font-bold gradient-text">{stat.value}</span>
-								<span className="text-xs text-base-content/50 uppercase tracking-wider">{stat.label}</span>
+								<span className="text-xs text-base-content/50 uppercase tracking-wider text-center">{stat.label}</span>
 							</div>
 						))}
 					</div>
@@ -82,17 +85,17 @@ const Home = () => {
 			<section className="px-4 py-16">
 				<div className="max-w-6xl mx-auto">
 					<div className="text-center mb-12">
-						<h2 className="section-title">Why Choose Trippy?</h2>
+						<h2 className="section-title">Why Choose Trippy 2.0?</h2>
 						<p className="text-base-content/50 text-lg">Everything you need for the perfect travel experience</p>
 					</div>
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 						{[
-							{ icon: "👥", title: "Travel Community", desc: "Connect with like-minded travelers, share stories, and build lasting friendships across the globe." },
-							{ icon: "🚗", title: "Car Rentals", desc: "Seamlessly rent vehicles from local providers. Browse, book, and hit the road in minutes." },
-							{ icon: "🤖", title: "AI Travel Guide", desc: "Get personalized recommendations and real-time suggestions from our intelligent chatbot assistant." },
+							{ icon: <Users size={40} className="text-primary" />, title: "Travel Community", desc: "Connect with like-minded travelers, share stories, and build lasting friendships across the globe." },
+							{ icon: <Car size={40} className="text-secondary" />, title: "Car Rentals", desc: "Seamlessly rent vehicles from local providers. Browse, book, and hit the road in minutes." },
+							{ icon: <Bot size={40} className="text-accent" />, title: "AI Travel Guide", desc: "Get personalized recommendations and real-time suggestions from our intelligent chatbot assistant." },
 						].map((feature, i) => (
-							<div key={i} className="glass-card p-8 text-center group cursor-default" style={{ animationDelay: `${i * 0.1}s` }}>
-								<div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">{feature.icon}</div>
+							<div key={i} className="glass-card p-8 text-center group cursor-default flex flex-col items-center" style={{ animationDelay: `${i * 0.1}s` }}>
+								<div className="mb-4 group-hover:scale-110 transition-transform duration-300">{feature.icon}</div>
 								<h3 className="text-xl font-bold mb-3">{feature.title}</h3>
 								<p className="text-base-content/50 leading-relaxed text-sm">{feature.desc}</p>
 							</div>
@@ -131,7 +134,7 @@ const Home = () => {
 											/>
 										) : (
 											<div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-purple-500/10 to-secondary/20 flex items-center justify-center">
-												<span className="text-6xl font-display font-bold text-white/10 group-hover:text-white/20 transition-colors duration-500">✈️</span>
+												<Plane size={64} className="opacity-10 group-hover:opacity-20 transition-opacity duration-500" />
 											</div>
 										)}
 										<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -153,7 +156,10 @@ const Home = () => {
 												</div>
 											)}
 											<div>
-												<p className="font-bold text-sm">{post.userName} {post.userVerified && <span title="Verified">✅</span>}</p>
+												<div className="flex items-center gap-1">
+													<p className="font-bold text-sm">{post.userName}</p>
+													{post.userVerified && <CheckCircle size={12} className="text-success" title="Verified" />}
+												</div>
 												<p className="text-xs text-base-content/40">Traveler</p>
 											</div>
 										</div>
@@ -170,7 +176,7 @@ const Home = () => {
 						</div>
 					) : (
 						<div className="glass-card p-16 text-center max-w-lg mx-auto">
-							<span className="text-6xl mb-4 block">🏖️</span>
+							<Palmtree size={64} className="mx-auto mb-4 text-primary/40" />
 							<h3 className="text-2xl font-bold mb-2">No adventures yet</h3>
 							<p className="text-base-content/50 mb-6">Be the first to share your travel story!</p>
 							{isLoggedIn && (

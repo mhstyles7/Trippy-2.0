@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Frown, Camera, MessageSquare, MessageCircle, Trash2, ZoomIn, X } from "lucide-react";
 
 const Post = () => {
 	const { id } = useParams();
@@ -77,8 +78,8 @@ const Post = () => {
 	if (error)
 		return (
 			<div className="min-h-screen flex items-center justify-center">
-				<div className="glass-card p-8 text-center max-w-md">
-					<span className="text-4xl mb-4 block">😕</span>
+				<div className="glass-card p-8 text-center max-w-md flex flex-col items-center">
+					<Frown size={48} className="text-primary/40 mb-4" />
 					<p className="text-error font-bold text-xl mb-2">Oops!</p>
 					<p className="text-base-content/50">{error}</p>
 					<button className="btn btn-primary btn-sm mt-4" onClick={() => navigate("/")}>Go Home</button>
@@ -107,8 +108,8 @@ const Post = () => {
 						/>
 						<div className="absolute inset-0 bg-gradient-to-t from-base-100/90 via-transparent to-transparent"></div>
 						{post.images.length > 1 && (
-							<div className="absolute bottom-4 right-4 badge badge-primary badge-lg gap-1">
-								📸 +{post.images.length - 1} more
+							<div className="absolute bottom-4 right-4 badge badge-primary badge-lg gap-2">
+								<Camera size={16} /> +{post.images.length - 1} more
 							</div>
 						)}
 					</div>
@@ -137,8 +138,8 @@ const Post = () => {
 							</div>
 						</div>
 						{userId === post.userId && (
-							<button onClick={handleDeletePost} className="btn btn-ghost btn-sm text-error hover:bg-error/10 gap-1">
-								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+							<button onClick={handleDeletePost} className="btn btn-ghost btn-sm text-error hover:bg-error/10 gap-2">
+								<Trash2 size={16} />
 								Delete
 							</button>
 						)}
@@ -160,7 +161,7 @@ const Post = () => {
 									<img src={image} alt={`Post image ${index + 2}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
 									<div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
 										<span className="btn btn-circle btn-ghost text-white border-white/30">
-											<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+											<ZoomIn size={20} />
 										</span>
 									</div>
 								</div>
@@ -173,7 +174,7 @@ const Post = () => {
 			{/* Comments Section */}
 			<section className="glass-panel rounded-3xl p-8 md:p-12">
 				<h3 className="text-2xl font-bold mb-8 flex items-center gap-3">
-					💬 Comments
+					<MessageSquare size={24} className="text-primary" /> Comments
 					<span className="badge badge-primary badge-sm">{comments.length}</span>
 				</h3>
 
@@ -202,8 +203,8 @@ const Post = () => {
 				{/* Comments List */}
 				<div className="space-y-4">
 					{comments.length === 0 && (
-						<div className="text-center py-10">
-							<span className="text-4xl mb-2 block">💭</span>
+						<div className="text-center py-10 flex flex-col items-center">
+							<MessageCircle size={48} className="text-primary/20 mb-2" />
 							<p className="text-base-content/40">No comments yet. Be the first to share your thoughts!</p>
 						</div>
 					)}
@@ -231,7 +232,9 @@ const Post = () => {
 				<div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
 					<div className="absolute inset-0 bg-black/90 backdrop-blur-sm" onClick={() => setSelectedImage(null)}></div>
 					<div className="relative z-10 max-w-5xl w-full">
-						<button className="btn btn-circle btn-sm bg-white/10 border-white/20 text-white absolute -top-12 right-0 hover:bg-white/20" onClick={() => setSelectedImage(null)}>✕</button>
+						<button className="btn btn-circle btn-sm bg-white/10 border-white/20 text-white absolute -top-12 right-0 hover:bg-white/20" onClick={() => setSelectedImage(null)}>
+							<X size={18} />
+						</button>
 						<img src={selectedImage} alt="Enlarged view" className="max-h-[85vh] rounded-xl shadow-2xl mx-auto" />
 					</div>
 				</div>

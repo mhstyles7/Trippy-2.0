@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
+import { Home, LogIn, UserPlus, Users, PenSquare, Briefcase, Plane, User, IdCard, CheckCircle, LogOut } from "lucide-react";
 
 // eslint-disable-next-line react/prop-types
 const Navbar = ({ isSidebar = false }) => {
@@ -18,33 +19,34 @@ const Navbar = ({ isSidebar = false }) => {
 	}, [user]);
 
 	const linkClass = ({ isActive }) =>
-		`${isActive ? "bg-primary/20 text-primary font-bold" : "text-base-content/70 hover:text-primary hover:bg-primary/10"} transition-all duration-200 rounded-lg`;
+		`${isActive ? "bg-primary/20 text-primary font-bold" : "text-base-content/70 hover:text-primary hover:bg-primary/10"} transition-all duration-200 rounded-lg flex items-center gap-2`;
 
 	const navItems = (
 		<>
-			<li><NavLink to="/" className={linkClass}>🏠 Home</NavLink></li>
+			<li><NavLink to="/" className={linkClass}><Home size={18} /> Home</NavLink></li>
 			{!isLoggedIn && (
 				<>
-					<li><NavLink to="/login" className={linkClass}>🔑 Login</NavLink></li>
-					<li><NavLink to="/register" className={linkClass}>📝 Register</NavLink></li>
+					<li><NavLink to="/login" className={linkClass}><LogIn size={18} /> Login</NavLink></li>
+					<li><NavLink to="/register" className={linkClass}><UserPlus size={18} /> Register</NavLink></li>
 				</>
 			)}
 			{isLoggedIn && (
 				<>
-					<li><NavLink to="/friends" className={linkClass}>👥 Friends</NavLink></li>
-					<li><NavLink to="/create" className={linkClass}>✍️ Create</NavLink></li>
+					<li><NavLink to="/friends" className={linkClass}><Users size={18} /> Friends</NavLink></li>
+					<li><NavLink to="/create" className={linkClass}><PenSquare size={18} /> Create</NavLink></li>
 					<li>
 						<NavLink to={user.role === 'carRentalUser' ? "/provider-dashboard" : "/traveler-dashboard"} className={linkClass}>
-							{user.role === 'carRentalUser' ? '💼 Business' : '✈️ Trips'}
+							{user.role === 'carRentalUser' ? <Briefcase size={18} /> : <Plane size={18} />}
+							{user.role === 'carRentalUser' ? 'Business' : 'Trips'}
 						</NavLink>
 					</li>
-					<li><NavLink to="/profile" className={linkClass}>👤 Profile</NavLink></li>
+					<li><NavLink to="/profile" className={linkClass}><User size={18} /> Profile</NavLink></li>
 					{!isVerified && (
 						<li>
 							<NavLink to="/ocr" className={linkClass}>
-								<span className="relative">
-									🪪 Verify
-									<span className="absolute -top-1 -right-3 w-2 h-2 bg-warning rounded-full animate-pulse"></span>
+								<span className="relative flex items-center gap-2">
+									<IdCard size={18} /> Verify
+									<span className="absolute -top-1 -right-1 w-2 h-2 bg-warning rounded-full animate-pulse"></span>
 								</span>
 							</NavLink>
 						</li>
@@ -52,7 +54,7 @@ const Navbar = ({ isSidebar = false }) => {
 					{isVerified && (
 						<li>
 							<span className="text-success/60 text-xs flex items-center gap-1 px-3 py-2" title="Identity Verified">
-								✅ Verified
+								<CheckCircle size={14} /> Verified
 							</span>
 						</li>
 					)}
@@ -60,9 +62,9 @@ const Navbar = ({ isSidebar = false }) => {
 						<NavLink
 							onClick={() => localStorage.removeItem("user")}
 							to="/login"
-							className="text-error/70 hover:text-error hover:bg-error/10 transition-all duration-200 rounded-lg"
+							className="text-error/70 hover:text-error hover:bg-error/10 transition-all duration-200 rounded-lg flex items-center gap-2"
 						>
-							🚪 Logout
+							<LogOut size={18} /> Logout
 						</NavLink>
 					</li>
 				</>

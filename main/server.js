@@ -589,6 +589,57 @@ app.post('/rental-offers/respond', async (req, res) => {
 });
 
 // ==========================================
+//  RATINGS & REVIEWS (PHASE 3)
+// ==========================================
+
+// Submit a rating
+app.post('/ratings', async (req, res) => {
+    const { travelerId, providerId, rating, review, requestId } = req.body;
+    try {
+        const newRating = {
+            travelerId,
+            providerId,
+            rating: Number(rating),
+            review,
+            requestId,
+            createdAt: new Date()
+        };
+        await db.collection('ratings').insertOne(newRating);
+        
+        // Also mark the request as completed if not already
+        if (requestId) {
+            await db.collection('tripRequests').updateOne(
+                { _id: new ObjectId(requestId) },
+                { $set: { status: 'completed' } }
+            );
+        }
+
+        res.status(201).json({ message: 'Rating submitted' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error submitting rating' });
+    }
+});
+
+// Get ratings for a provider
+app.get('/ratings/:providerId', async (req, res) => {
+    try {
+        const ratings = await db.collection('ratings')
+            .find({ providerId: req.params.providerId })
+            .sort({ createdAt: -1 })
+            .toArray();
+            
+        // Calculate average
+        const avgRating = ratings.length > 0 
+            ? ratings.reduce((acc, curr) => acc + curr.rating, 0) / ratings.length 
+            : 0;
+            
+        res.json({ ratings, average: avgRating.toFixed(1), total: ratings.length });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching ratings' });
+    }
+});
+
+// ==========================================
 //  START SERVER
 // ==========================================
 

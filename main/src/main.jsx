@@ -14,6 +14,7 @@ import Post from "./Pages/Home/Post";
 import Profile from "./Pages/Profile/Profile";
 import ProviderDashboard from "./Pages/Marketplace/ProviderDashboard";
 import TravelerDashboard from "./Pages/Marketplace/TravelerDashboard";
+import PrivateRoute from "./Pages/Authentication/PrivateRoute";
 const router = createBrowserRouter([
 	{
 		path: "/",
@@ -37,27 +38,27 @@ const router = createBrowserRouter([
 			},
 			{
 				path: "/friends",
-				element: <Friends></Friends>,
+				element: <PrivateRoute><Friends></Friends></PrivateRoute>,
 			},
 			{
 				path: "/create",
-				element: <CreatePage></CreatePage>,
+				element: <PrivateRoute><CreatePage></CreatePage></PrivateRoute>,
 			},
 			{
 				path: "/profile",
-				element: <Profile></Profile>,
+				element: <PrivateRoute><Profile></Profile></PrivateRoute>,
 			},
 			{
 				path: "/post/:id",
-				element: <Post></Post>,
+				element: <PrivateRoute><Post></Post></PrivateRoute>,
 			},
 			{
 				path: "/provider-dashboard",
-				element: <ProviderDashboard></ProviderDashboard>,
+				element: <PrivateRoute><ProviderDashboard></ProviderDashboard></PrivateRoute>,
 			},
 			{
 				path: "/traveler-dashboard",
-				element: <TravelerDashboard></TravelerDashboard>,
+				element: <PrivateRoute><TravelerDashboard></TravelerDashboard></PrivateRoute>,
 			},
 		],
 	},

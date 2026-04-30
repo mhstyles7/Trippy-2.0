@@ -1,8 +1,8 @@
-/* eslint-disable no-unused-vars */
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthProvider";
 import axios from "axios";
+import { Plane, AlertCircle } from "lucide-react";
 
 const Login = () => {
 	const { loginUser } = useContext(AuthContext);
@@ -113,18 +113,20 @@ const Login = () => {
 				{/* Left Panel */}
 				<div className="w-full lg:w-1/2 p-10 lg:p-14 flex flex-col justify-center bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 relative">
 					<div className="z-10">
-						<span className="text-6xl mb-4 block">✈️</span>
+						<div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-6">
+							<Plane size={40} className="text-primary -rotate-12" />
+						</div>
 						<h1 className="text-5xl font-display font-bold mb-4 gradient-text">
 							Welcome<br />Back!
 						</h1>
 						<p className="text-lg text-base-content/50 mb-8 font-light leading-relaxed">
-							Ready to explore the world? Sign in to continue your journey with Trippy.
+							Ready to explore the world? Sign in to continue your journey with Trippy 2.0.
 						</p>
 						<div className="hidden lg:block">
 							<p className="text-sm text-base-content/30">
 								Don't have an account? <br />
 								<Link to="/register" className="link link-primary font-bold hover:text-glow">
-									Join the community →
+									Join the community
 								</Link>
 							</p>
 						</div>
@@ -136,8 +138,8 @@ const Login = () => {
 					<h2 className="text-2xl font-bold mb-8 text-center lg:text-left">Sign In</h2>
 
 					{error && (
-						<div className="alert alert-error mb-6 text-sm">
-							<svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+						<div className="alert alert-error mb-6 text-sm flex items-center gap-2">
+							<AlertCircle size={20} />
 							<span>{error}</span>
 						</div>
 					)}
@@ -152,6 +154,7 @@ const Login = () => {
 								name="email"
 								placeholder="your@email.com"
 								className="input input-bordered input-glass w-full"
+								autoComplete="email"
 								required
 							/>
 						</div>
@@ -164,6 +167,7 @@ const Login = () => {
 								name="password"
 								placeholder="••••••••"
 								className="input input-bordered input-glass w-full"
+								autoComplete="current-password"
 								required
 							/>
 							<label className="label">

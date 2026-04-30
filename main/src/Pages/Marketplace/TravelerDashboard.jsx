@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Plus, Send, Sparkles } from 'lucide-react';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
 
 const TravelerDashboard = () => {
     const [activeTab, setActiveTab] = useState('plans'); // 'plans' or 'inbox'
     const [myRequests, setMyRequests] = useState([]);
     const [offers, setOffers] = useState({}); // Map requestId -> offers[]
     const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
+    const [ratingData, setRatingData] = useState({ providerId: null, requestId: null, rating: 5, review: '' });
 
     // New Request Form State
     const [newRequest, setNewRequest] = useState({
-        destination: '', dates: '', groupSize: '', budget: '', vehicleType: 'Microbus', description: ''
+        destination: '', dates: '', groupSize: '', budget: '', vehicleType: 'Microbus', description: '', itinerary: ''
     });
+    const [isGenerating, setIsGenerating] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -62,6 +69,46 @@ const TravelerDashboard = () => {
         }
     };
 
+    const handleGenerateItinerary = async () => {
+        if (!newRequest.destination || !newRequest.dates) {
+            alert('Please fill in Destination and Dates first to generate an itinerary.');
+            return;
+        }
+        if (!genAI) {
+            alert('AI is currently unavailable (API key missing).');
+            return;
+        }
+        setIsGenerating(true);
+        try {
+            const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+            const prompt = `Generate a concise, day-by-day travel itinerary for a trip to ${newRequest.destination} during ${newRequest.dates}. The group size is ${newRequest.groupSize || 'unknown'} and the budget is ${newRequest.budget || 'moderate'}. Keep it brief, exciting, and format it clearly with bullet points.`;
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
+            setNewRequest(prev => ({ ...prev, itinerary: response.text() }));
+        } catch (error) {
+            console.error("Failed to generate itinerary:", error);
+            alert("Failed to generate itinerary. Try again later.");
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+    const submitRating = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.post('http://localhost:3000/ratings', {
+                travelerId: user._id,
+                ...ratingData
+            });
+            fetchMyRequests(); // Update status to completed
+            document.getElementById('rating-modal').close();
+            setRatingData({ providerId: null, requestId: null, rating: 5, review: '' });
+            alert('Rating submitted successfully!');
+        } catch (error) {
+            alert('Failed to submit rating.');
+        }
+    };
+
     return (
         <div className="min-h-screen bg-base-100 p-4 lg:p-8">
             <div className="max-w-5xl mx-auto">
@@ -70,8 +117,8 @@ const TravelerDashboard = () => {
                         <h1 className="text-3xl font-bold font-display gradient-text">Traveler Dashboard</h1>
                         <p className="opacity-60">Plan your trips and get the best rides</p>
                     </div>
-                    <button className="btn btn-primary" onClick={() => document.getElementById('new-trip-modal').showModal()}>
-                        ➕ Post New Trip
+                    <button className="btn btn-primary flex items-center gap-2" onClick={() => document.getElementById('new-trip-modal').showModal()}>
+                        <Plus size={18} /> Post New Trip
                     </button>
                 </div>
 
@@ -97,6 +144,13 @@ const TravelerDashboard = () => {
                                         <div><span className="opacity-50 block text-xs">BUDGET</span>৳{req.budget}</div>
                                         <div><span className="opacity-50 block text-xs">NOTE</span>{req.description}</div>
                                     </div>
+                                    
+                                    {req.itinerary && (
+                                        <div className="mb-6 bg-primary/5 border border-primary/20 p-4 rounded-xl">
+                                            <h3 className="font-bold text-sm text-primary mb-2 flex items-center gap-2"><Sparkles size={16}/> AI Generated Itinerary</h3>
+                                            <div className="text-sm opacity-80 whitespace-pre-wrap">{req.itinerary}</div>
+                                        </div>
+                                    )}
 
                                     {/* OFFERS SECTION */}
                                     <h3 className="font-bold text-sm opacity-70 mb-3">RECEIVED OFFERS ({offers[req._id]?.length || 0})</h3>
@@ -112,11 +166,27 @@ const TravelerDashboard = () => {
                                                         </div>
                                                         {offer.status === 'pending' && req.status === 'open' ? (
                                                             <div className="flex gap-2">
-                                                                <button className="btn btn-xs btn-success" onClick={() => handleOfferResponse(offer._id, 'accepted')}>Accept</button>
-                                                                <button className="btn btn-xs btn-ghost text-error" onClick={() => handleOfferResponse(offer._id, 'rejected')}>Decline</button>
+                                                                 <button className="btn btn-xs btn-success" onClick={() => handleOfferResponse(offer._id, 'accepted')}>Accept</button>
+                                                                 <button className="btn btn-xs btn-ghost text-error" onClick={() => handleOfferResponse(offer._id, 'rejected')}>Decline</button>
                                                             </div>
                                                         ) : (
-                                                            <div className={`badge ${offer.status === 'accepted' ? 'badge-success' : 'badge-ghost'}`}>{offer.status}</div>
+                                                            <div className="flex flex-col items-end gap-2">
+                                                                <div className={`badge ${offer.status === 'accepted' ? 'badge-success' : 'badge-ghost'}`}>{offer.status}</div>
+                                                                {offer.status === 'accepted' && req.status === 'booked' && (
+                                                                    <button 
+                                                                        className="btn btn-xs btn-outline btn-primary"
+                                                                        onClick={() => {
+                                                                            setRatingData({ ...ratingData, providerId: offer.providerId, requestId: req._id });
+                                                                            document.getElementById('rating-modal').showModal();
+                                                                        }}
+                                                                    >
+                                                                        Mark Completed & Rate
+                                                                    </button>
+                                                                )}
+                                                                {req.status === 'completed' && offer.status === 'accepted' && (
+                                                                    <span className="text-xs text-success/80">Trip Completed</span>
+                                                                )}
+                                                            </div>
                                                         )}
                                                     </div>
                                                 </div>
@@ -151,10 +221,56 @@ const TravelerDashboard = () => {
                             <option>Bus</option>
                         </select>
                         <textarea className="textarea textarea-bordered" placeholder="Special requirements..." value={newRequest.description} onChange={e => setNewRequest({ ...newRequest, description: e.target.value })}></textarea>
+                        
+                        <div className="border border-base-content/10 p-3 rounded-lg flex flex-col gap-2">
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm font-bold opacity-70">AI Itinerary (Optional)</span>
+                                <button type="button" onClick={handleGenerateItinerary} disabled={isGenerating} className="btn btn-xs btn-outline btn-primary flex items-center gap-1">
+                                    {isGenerating ? <span className="loading loading-spinner loading-xs"></span> : <Sparkles size={14} />} Auto-Generate
+                                </button>
+                            </div>
+                            {newRequest.itinerary && (
+                                <textarea className="textarea textarea-bordered w-full text-sm mt-2" rows={4} value={newRequest.itinerary} onChange={e => setNewRequest({ ...newRequest, itinerary: e.target.value })}></textarea>
+                            )}
+                        </div>
 
                         <div className="modal-action">
                             <button type="button" className="btn" onClick={() => document.getElementById('new-trip-modal').close()}>Cancel</button>
-                            <button type="submit" className="btn btn-primary" onClick={() => document.getElementById('new-trip-modal').close()}>Post Trip 🚀</button>
+                            <button type="submit" className="btn btn-primary flex items-center gap-2" onClick={() => document.getElementById('new-trip-modal').close()}>
+                                <Send size={18} /> Post Trip
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </dialog>
+
+            {/* Rating Modal */}
+            <dialog id="rating-modal" className="modal">
+                <div className="modal-box">
+                    <h3 className="font-bold text-lg mb-4">Rate Your Provider</h3>
+                    <form onSubmit={submitRating} className="flex flex-col gap-4">
+                        <div className="flex items-center justify-center gap-2 my-2">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <button 
+                                    type="button"
+                                    key={star} 
+                                    onClick={() => setRatingData({ ...ratingData, rating: star })}
+                                    className={`text-4xl ${ratingData.rating >= star ? 'text-warning' : 'text-base-content/20'}`}
+                                >
+                                    ★
+                                </button>
+                            ))}
+                        </div>
+                        <textarea 
+                            className="textarea textarea-bordered w-full" 
+                            placeholder="Write a short review about your experience..."
+                            value={ratingData.review}
+                            onChange={(e) => setRatingData({ ...ratingData, review: e.target.value })}
+                            required
+                        ></textarea>
+                        <div className="modal-action">
+                            <button type="button" className="btn" onClick={() => document.getElementById('rating-modal').close()}>Cancel</button>
+                            <button type="submit" className="btn btn-success text-white">Submit Rating</button>
                         </div>
                     </form>
                 </div>

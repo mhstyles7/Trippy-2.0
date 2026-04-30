@@ -23,7 +23,7 @@ const Layout = () => {
 									<defs><linearGradient id="grad1" x1="12" y1="8" x2="20" y2="16"><stop stopColor="#6C3CE1" /><stop offset="1" stopColor="#4F9CF7" /></linearGradient></defs>
 								</svg>
 							</div>
-							<span className="text-2xl font-bold gradient-text font-display group-hover:text-glow transition-all">Trippy</span>
+							<span className="text-2xl font-bold gradient-text font-display group-hover:text-glow transition-all">Trippy 2.0</span>
 						</Link>
 					</div>
 					<div className="flex-none hidden lg:block">
@@ -47,12 +47,12 @@ const Layout = () => {
 									<defs><linearGradient id="grad2" x1="12" y1="8" x2="20" y2="16"><stop stopColor="#6C3CE1" /><stop offset="1" stopColor="#4F9CF7" /></linearGradient></defs>
 								</svg>
 							</div>
-							<p className="font-display text-xl font-bold gradient-text">Trippy</p>
+							<p className="font-display text-xl font-bold gradient-text">Trippy 2.0</p>
 						</div>
 						<p className="text-base-content/50 max-w-md">
 							Your one-stop solution for social travel connectivity and efficient tour management. Connect, explore, and share your adventures.
 						</p>
-						<p className="text-base-content/30 text-sm mt-4">© {new Date().getFullYear()} Trippy. All rights reserved.</p>
+						<p className="text-base-content/30 text-sm mt-4">© {new Date().getFullYear()} Trippy 2.0. All rights reserved.</p>
 					</aside>
 					<nav>
 						<div className="grid grid-flow-col gap-6">
@@ -80,7 +80,7 @@ const Layout = () => {
 									<defs><linearGradient id="grad3" x1="12" y1="8" x2="20" y2="16"><stop stopColor="#6C3CE1" /><stop offset="1" stopColor="#4F9CF7" /></linearGradient></defs>
 								</svg>
 							</div>
-							<span className="text-2xl font-bold gradient-text font-display">Trippy</span>
+							<span className="text-2xl font-bold gradient-text font-display">Trippy 2.0</span>
 						</div>
 						<ul className="menu gap-1">
 							<Navbar isSidebar={true} />

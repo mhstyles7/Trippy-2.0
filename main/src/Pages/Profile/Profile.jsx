@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import { CheckCircle, Car, Backpack, AlertTriangle, Plus, Users, Camera, Plane, Palmtree } from "lucide-react";
 
 export default function Profile() {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -47,8 +48,8 @@ export default function Profile() {
                             </div>
                         </div>
                         <div className="flex-1">
-                            <h1 className="text-4xl md:text-5xl font-display font-bold gradient-text mb-2">
-                                {user.name} {user.verifyOCR && <span className="text-2xl" title="Verified Identity">✅</span>}
+                            <h1 className="text-4xl md:text-5xl font-display font-bold gradient-text mb-2 flex items-center justify-center md:justify-start gap-2">
+                                {user.name} {user.verifyOCR && <CheckCircle className="text-success" size={24} title="Verified Identity" />}
                             </h1>
                             <p className="text-base-content/40 text-lg mb-6">{user.email}</p>
 
@@ -58,22 +59,28 @@ export default function Profile() {
                                     <span className="text-xs text-base-content/40 uppercase tracking-wider">Posts</span>
                                 </div>
                                 <div className="stat-card rounded-2xl px-6 py-3 min-w-[100px]">
-                                    <span className="text-sm font-bold text-secondary">{user.role === "carRentalUser" ? "🚗 Provider" : "🎒 Traveler"}</span>
+                                    <span className="text-sm font-bold text-secondary flex items-center gap-2">
+                                        {user.role === "carRentalUser" ? <Car size={16} /> : <Backpack size={16} />}
+                                        {user.role === "carRentalUser" ? "Provider" : "Traveler"}
+                                    </span>
                                     <span className="text-xs text-base-content/40 uppercase tracking-wider">Role</span>
                                 </div>
                                 <div className="stat-card rounded-2xl px-6 py-3 min-w-[100px]">
-                                    <span className={`text-sm font-bold ${user.verifyOCR ? 'text-success' : 'text-warning'}`}>{user.verifyOCR ? '✅ Verified' : '⚠️ Unverified'}</span>
+                                    <span className={`text-sm font-bold ${user.verifyOCR ? 'text-success' : 'text-warning'} flex items-center gap-2`}>
+                                        {user.verifyOCR ? <CheckCircle size={16} /> : <AlertTriangle size={16} />}
+                                        {user.verifyOCR ? 'Verified' : 'Unverified'}
+                                    </span>
                                     <span className="text-xs text-base-content/40 uppercase tracking-wider">Status</span>
                                 </div>
                             </div>
                         </div>
                         <div className="flex flex-col gap-3">
                             <Link to="/create" className="btn btn-gradient btn-glow gap-2 shadow-lg shadow-primary/20">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                                <Plus size={18} />
                                 New Post
                             </Link>
                             <Link to="/friends" className="btn btn-outline btn-sm border-white/10 hover:bg-white/5 gap-2">
-                                👥 Friends
+                                <Users size={16} /> Friends
                             </Link>
                         </div>
                     </div>
@@ -82,7 +89,9 @@ export default function Profile() {
                 {/* User Posts */}
                 <div>
                     <h2 className="text-3xl font-bold mb-8 flex items-center gap-3">
-                        <span className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-lg">📸</span>
+                        <span className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                            <Camera size={20} className="text-primary" />
+                        </span>
                         My Journeys
                     </h2>
 
@@ -99,7 +108,7 @@ export default function Profile() {
                                             <img src={post.images[0]} alt={post.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                         ) : (
                                             <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                                                <span className="text-4xl opacity-30">✈️</span>
+                                                <Plane size={48} className="opacity-20" />
                                             </div>
                                         )}
                                         <div className="absolute inset-0 bg-gradient-to-t from-base-100/80 via-transparent to-transparent"></div>
@@ -113,7 +122,7 @@ export default function Profile() {
                         </div>
                     ) : (
                         <div className="glass-card p-16 text-center max-w-lg mx-auto">
-                            <span className="text-6xl mb-4 block">🏖️</span>
+                            <Palmtree size={64} className="mx-auto mb-4 text-primary/40" />
                             <h3 className="text-2xl font-bold mb-2">No journeys yet</h3>
                             <p className="text-base-content/40 mb-6">Share your first adventure with the community!</p>
                             <Link to="/create" className="btn btn-gradient">Create Your First Post</Link>

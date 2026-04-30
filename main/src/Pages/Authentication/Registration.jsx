@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import { Globe, Backpack, Car, AlertCircle, User, X } from "lucide-react";
 
 const Registration = () => {
     const navigate = useNavigate();
@@ -67,9 +68,11 @@ const Registration = () => {
                 {/* Left Panel */}
                 <div className="w-full lg:w-5/12 p-10 lg:p-14 flex flex-col justify-center bg-gradient-to-br from-secondary/10 via-transparent to-primary/10 relative">
                     <div className="z-10 relative">
-                        <span className="text-6xl mb-4 block">🌍</span>
+                        <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mb-6">
+                            <Globe size={40} className="text-primary" />
+                        </div>
                         <h1 className="text-5xl font-display font-bold mb-4 gradient-text">
-                            Join<br />Trippy
+                            Join<br />Trippy 2.0
                         </h1>
                         <p className="text-lg text-base-content/50 mb-8 font-light leading-relaxed">
                             Your journey begins here. Connect with travelers or manage your rental fleet.
@@ -88,8 +91,8 @@ const Registration = () => {
                     <h2 className="text-3xl font-bold mb-8 text-center">Create Account</h2>
 
                     {error && (
-                        <div className="alert alert-error mb-4 text-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <div className="alert alert-error mb-4 text-sm flex items-center gap-2">
+                            <AlertCircle size={20} />
                             <span>{error}</span>
                         </div>
                     )}
@@ -103,7 +106,7 @@ const Registration = () => {
                                     className={`cursor-pointer border-2 rounded-2xl p-5 flex flex-col items-center gap-2 transition-all duration-300 ${role === 'traveler' ? 'border-primary bg-primary/10 shadow-lg shadow-primary/10' : 'border-white/[0.08] hover:border-primary/30 hover:bg-white/[0.03]'}`}
                                     onClick={() => setRole("traveler")}
                                 >
-                                    <span className="text-4xl">🎒</span>
+                                    <Backpack size={32} className={role === 'traveler' ? 'text-primary' : 'text-base-content/40'} />
                                     <span className="font-bold text-sm">Traveler</span>
                                     <span className="text-[10px] text-center text-base-content/40">Explore & connect</span>
                                 </div>
@@ -111,7 +114,7 @@ const Registration = () => {
                                     className={`cursor-pointer border-2 rounded-2xl p-5 flex flex-col items-center gap-2 transition-all duration-300 ${role === 'carRentalUser' ? 'border-secondary bg-secondary/10 shadow-lg shadow-secondary/10' : 'border-white/[0.08] hover:border-secondary/30 hover:bg-white/[0.03]'}`}
                                     onClick={() => setRole("carRentalUser")}
                                 >
-                                    <span className="text-4xl">🚗</span>
+                                    <Car size={32} className={role === 'carRentalUser' ? 'text-secondary' : 'text-base-content/40'} />
                                     <span className="font-bold text-sm">Rental Provider</span>
                                     <span className="text-[10px] text-center text-base-content/40">Offer vehicles</span>
                                 </div>
@@ -122,7 +125,7 @@ const Registration = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="form-control">
                                 <label className="label"><span className="label-text font-bold text-base-content/70">Full Name</span></label>
-                                <input className="input input-bordered input-glass w-full" type="text" name="name" placeholder="John Doe" required />
+                                <input className="input input-bordered input-glass w-full" type="text" name="name" placeholder="John Doe" autoComplete="name" required />
                             </div>
                             {/* Profile Photo Upload */}
                             <div className="form-control">
@@ -135,11 +138,13 @@ const Registration = () => {
                                                 type="button"
                                                 onClick={() => { setPhotoPreview(null); setPhotoBase64(""); }}
                                                 className="absolute -top-1 -right-1 w-5 h-5 bg-error rounded-full text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >×</button>
+                                            >
+                                                <X size={12} />
+                                            </button>
                                         </div>
                                     ) : (
                                         <div className="w-12 h-12 rounded-full bg-white/[0.05] border border-white/[0.08] flex items-center justify-center text-base-content/30">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                                            <User size={24} />
                                         </div>
                                     )}
                                     <input
@@ -155,17 +160,17 @@ const Registration = () => {
 
                         <div className="form-control">
                             <label className="label"><span className="label-text font-bold text-base-content/70">Email</span></label>
-                            <input className="input input-bordered input-glass w-full" type="email" name="email" placeholder="your@email.com" required />
+                            <input className="input input-bordered input-glass w-full" type="email" name="email" placeholder="your@email.com" autoComplete="email" required />
                         </div>
 
                         <div className="form-control">
                             <label className="label"><span className="label-text font-bold text-base-content/70">Password</span></label>
-                            <input className="input input-bordered input-glass w-full" type="password" name="password" placeholder="••••••••" required />
+                            <input className="input input-bordered input-glass w-full" type="password" name="password" placeholder="••••••••" autoComplete="new-password" required />
                         </div>
 
                         <div className="form-control mt-8">
                             <button className={`btn btn-gradient btn-glow w-full text-lg shadow-lg ${loading ? 'loading' : ''}`} disabled={loading}>
-                                {loading ? 'Creating account...' : 'Start My Journey →'}
+                                {loading ? 'Creating account...' : 'Start My Journey'}
                             </button>
                         </div>
                     </form>

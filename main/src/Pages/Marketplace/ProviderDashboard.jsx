@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Map, Car, CheckCircle, Tag, Plus, Send } from 'lucide-react';
 
 const ProviderDashboard = () => {
     const [activeTab, setActiveTab] = useState('leads'); // 'leads' or 'garage'
@@ -95,14 +96,18 @@ const ProviderDashboard = () => {
     return (
         <div className="min-h-screen bg-base-100 p-4 lg:p-8">
             <div className="max-w-6xl mx-auto">
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                     <div>
                         <h1 className="text-3xl font-bold font-display gradient-text">Provider Dashboard</h1>
                         <p className="opacity-60">Manage your fleet and find customers</p>
                     </div>
                     <div className="tabs tabs-boxed bg-base-200 p-1">
-                        <a className={`tab ${activeTab === 'leads' ? 'tab-active bg-primary text-white' : ''}`} onClick={() => setActiveTab('leads')}>Trip Leads 🗺️</a>
-                        <a className={`tab ${activeTab === 'garage' ? 'tab-active bg-secondary text-white' : ''}`} onClick={() => setActiveTab('garage')}>My Garage 🚘</a>
+                        <a className={`tab flex items-center gap-2 ${activeTab === 'leads' ? 'tab-active bg-primary text-white' : ''}`} onClick={() => setActiveTab('leads')}>
+                            <Map size={16} /> Trip Leads
+                        </a>
+                        <a className={`tab flex items-center gap-2 ${activeTab === 'garage' ? 'tab-active bg-secondary text-white' : ''}`} onClick={() => setActiveTab('garage')}>
+                            <Car size={16} /> My Garage
+                        </a>
                     </div>
                 </div>
 
@@ -110,7 +115,10 @@ const ProviderDashboard = () => {
                 {activeTab === 'leads' && (
                     <div className="grid grid-cols-1 gap-6">
                         {leads.length === 0 ? (
-                            <div className="text-center py-20 opacity-50">No active trip requests at the moment.</div>
+                            <div className="text-center py-20 opacity-50 flex flex-col items-center gap-2">
+                                <Map size={48} className="opacity-20" />
+                                <span>No active trip requests at the moment.</span>
+                            </div>
                         ) : (
                             leads.map(lead => (
                                 <div key={lead._id} className="card bg-base-100 shadow-xl border border-white/5 hover:border-primary/20 transition-all">
@@ -124,7 +132,10 @@ const ProviderDashboard = () => {
                                                 </div>
                                                 <div>
                                                     <h3 className="font-bold text-lg">{lead.destination}</h3>
-                                                    <p className="text-sm opacity-70">by {lead.travelerName} {lead.travelerVerified && '✅'}</p>
+                                                    <div className="flex items-center gap-1 text-sm opacity-70">
+                                                        <span>by {lead.travelerName}</span>
+                                                        {lead.travelerVerified && <CheckCircle size={12} className="text-success" />}
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div className="badge badge-primary badge-outline">{lead.dates}</div>
@@ -138,7 +149,9 @@ const ProviderDashboard = () => {
                                         </div>
 
                                         <div className="card-actions justify-end mt-4">
-                                            <button className="btn btn-primary btn-sm" onClick={() => openBidModal(lead)}>Make an Offer 🏷️</button>
+                                            <button className="btn btn-primary btn-sm flex items-center gap-2" onClick={() => openBidModal(lead)}>
+                                                <Tag size={16} /> Make an Offer
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -172,7 +185,9 @@ const ProviderDashboard = () => {
                                         <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={newVehicle.ac} onChange={e => setNewVehicle({ ...newVehicle, ac: e.target.checked })} />
                                         <span className="label-text">AC Available</span>
                                     </label>
-                                    <button className="btn btn-secondary btn-sm mt-2">Add Vehicle ➕</button>
+                                    <button className="btn btn-secondary btn-sm mt-2 flex items-center justify-center gap-2">
+                                        <Plus size={16} /> Add Vehicle
+                                    </button>
                                 </form>
                             </div>
                         </div>
@@ -229,7 +244,9 @@ const ProviderDashboard = () => {
                         </div>
                         <div className="modal-action">
                             <button className="btn" onClick={() => setShowBidModal(false)}>Cancel</button>
-                            <button className="btn btn-primary" onClick={submitBid}>Send Offer 🚀</button>
+                            <button className="btn btn-primary flex items-center gap-2" onClick={submitBid}>
+                                <Send size={18} /> Send Offer
+                            </button>
                         </div>
                     </div>
                 </div>

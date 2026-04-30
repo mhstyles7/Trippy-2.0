@@ -1,0 +1,12 @@
+{
+  "name": "trippy-root",
+  "version": "1.0.0",
+  "description": "Root package forwarding commands to the main directory",
+  "scripts": {
+    "dev": "cd main && npm run dev",
+    "build": "cd main && npm run build",
+    "server": "cd main && npm run server",
+    "server:watch": "cd main && npm run server:watch",
+    "install-all": "cd main && npm install"
+  }
+}
