@@ -84,23 +84,26 @@ const TripChat = () => {
     return (
         <>
             {/* Floating Chat Bubble */}
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className={`fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-500 group ${isOpen
-                    ? 'bg-base-300 rotate-0 scale-90'
-                    : 'bg-gradient-to-r from-primary to-secondary hover:scale-110 hover:shadow-primary/40'
-                    }`}
-                aria-label="Toggle Chat"
-            >
-                {isOpen ? (
-                    <X className="w-7 h-7 text-base-content" />
-                ) : (
-                    <>
+            <div className="fixed bottom-6 right-6 z-50">
+                <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className={`relative w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-500 group ${isOpen
+                        ? 'bg-base-300 scale-90'
+                        : 'bg-gradient-to-r from-primary to-secondary hover:scale-110 hover:shadow-primary/40'
+                        }`}
+                    aria-label="Toggle Chat"
+                >
+                    {isOpen ? (
+                        <X className="w-7 h-7 text-base-content" />
+                    ) : (
                         <MessageSquare className="w-7 h-7 text-white" />
-                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-success rounded-full animate-pulse border-2 border-base-100"></span>
-                    </>
+                    )}
+                </button>
+                {/* Online indicator dot — outside button so it never gets clipped */}
+                {!isOpen && (
+                    <span className="absolute top-0 right-0 w-4 h-4 bg-success rounded-full animate-pulse border-2 border-base-100 pointer-events-none"></span>
                 )}
-            </button>
+            </div>
 
             {/* Chat Panel */}
             {isOpen && (

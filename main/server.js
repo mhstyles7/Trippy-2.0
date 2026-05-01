@@ -18,7 +18,7 @@ const client = new MongoClient(uri, {
     family: 4
 });
 
-let db, usersCollection, postsCollection, commentsCollection;
+let db, usersCollection, postsCollection, commentsCollection, notificationsCollection, tripChatCollection;
 
 async function connectDB() {
     try {
@@ -27,6 +27,8 @@ async function connectDB() {
         usersCollection = db.collection('users');
         postsCollection = db.collection('posts');
         commentsCollection = db.collection('comments');
+        notificationsCollection = db.collection('notifications');
+        tripChatCollection = db.collection('tripChat');
         console.log('✅ Connected to MongoDB');
     } catch (error) {
         console.error('❌ MongoDB Connection Error:', error);
@@ -34,6 +36,22 @@ async function connectDB() {
 }
 
 connectDB();
+
+// Helper: create a notification
+async function createNotification(recipientId, type, message, meta = {}) {
+    try {
+        await notificationsCollection.insertOne({
+            recipientId,
+            type,
+            message,
+            meta,
+            read: false,
+            createdAt: new Date()
+        });
+    } catch (e) {
+        console.error('Notification error:', e);
+    }
+}
 
 // ==========================================
 //  AUTH ROUTES
@@ -345,16 +363,17 @@ app.get('/friends/:userId', async (req, res) => {
 app.post('/friend-request', async (req, res) => {
     const { senderId, receiverId } = req.body;
     try {
-        // Add to sender's sentRequests
+        const sender = await usersCollection.findOne({ _id: new ObjectId(senderId) });
         await usersCollection.updateOne(
             { _id: new ObjectId(senderId) },
             { $addToSet: { sentRequests: new ObjectId(receiverId) } }
         );
-        // Add to receiver's friendRequests
         await usersCollection.updateOne(
             { _id: new ObjectId(receiverId) },
             { $addToSet: { friendRequests: new ObjectId(senderId) } }
         );
+        // Notify the receiver
+        await createNotification(receiverId, 'friend_request', `${sender?.name || 'Someone'} sent you a friend request`, { senderId });
         res.json({ message: 'Friend request sent' });
     } catch (error) {
         res.status(500).json({ message: 'Error sending friend request' });
@@ -365,7 +384,7 @@ app.post('/friend-request', async (req, res) => {
 app.post('/accept-request', async (req, res) => {
     const { userId, senderId } = req.body;
     try {
-        // Add each other as friends
+        const accepter = await usersCollection.findOne({ _id: new ObjectId(userId) });
         await usersCollection.updateOne(
             { _id: new ObjectId(userId) },
             {
@@ -380,6 +399,8 @@ app.post('/accept-request', async (req, res) => {
                 $pull: { sentRequests: new ObjectId(userId) }
             }
         );
+        // Notify the original sender that their request was accepted
+        await createNotification(senderId, 'friend_accepted', `${accepter?.name || 'Someone'} accepted your friend request`, { userId });
         res.json({ message: 'Friend request accepted' });
     } catch (error) {
         res.status(500).json({ message: 'Error accepting request' });
@@ -525,14 +546,26 @@ app.post('/rental-offers', async (req, res) => {
     const offer = req.body; // { requestId, providerId, vehicleId, price, message }
     try {
         offer.createdAt = new Date();
-        offer.status = 'pending'; // pending, accepted, rejected
+        offer.status = 'pending';
 
-        // Get vehicle details to snapshot price/model
         const vehicle = await db.collection('vehicles').findOne({ _id: new ObjectId(offer.vehicleId) });
         offer.vehicleSnapshot = vehicle;
 
         const result = await db.collection('rentalOffers').insertOne(offer);
         offer._id = result.insertedId;
+
+        // Notify the traveler about the new offer
+        const provider = await usersCollection.findOne({ _id: new ObjectId(offer.providerId) });
+        const tripRequest = await db.collection('tripRequests').findOne({ _id: new ObjectId(offer.requestId) });
+        if (tripRequest?.travelerId) {
+            await createNotification(
+                tripRequest.travelerId,
+                'new_offer',
+                `${provider?.name || 'A provider'} sent you an offer for ৳${offer.price} on your trip to ${tripRequest?.destination || 'your destination'}`,
+                { requestId: offer.requestId, offerId: result.insertedId.toString() }
+            );
+        }
+
         res.status(201).json(offer);
     } catch (error) {
         res.status(500).json({ message: 'Error sending offer' });
@@ -566,24 +599,38 @@ app.get('/rental-offers/request/:requestId', async (req, res) => {
 
 // Accept/Reject Offer
 app.post('/rental-offers/respond', async (req, res) => {
-    const { offerId, status } = req.body; // status: 'accepted' or 'rejected'
+    const { offerId, status } = req.body;
     try {
         await db.collection('rentalOffers').updateOne(
             { _id: new ObjectId(offerId) },
             { $set: { status } }
         );
 
-        // If accepted, close the trip request
         if (status === 'accepted') {
             const offer = await db.collection('rentalOffers').findOne({ _id: new ObjectId(offerId) });
+            // requestId is stored as a plain string — find by string field
+            const tripRequest = await db.collection('tripRequests').findOne({ _id: new ObjectId(offer.requestId) });
             await db.collection('tripRequests').updateOne(
                 { _id: new ObjectId(offer.requestId) },
                 { $set: { status: 'booked', bookedOfferId: offerId } }
             );
+            // travelerId is a plain string ID stored by the frontend
+            const traveler = tripRequest?.travelerId
+                ? await usersCollection.findOne({ _id: new ObjectId(tripRequest.travelerId) })
+                : null;
+            if (offer?.providerId) {
+                await createNotification(
+                    offer.providerId,
+                    'offer_accepted',
+                    `🎉 ${traveler?.name || 'A traveler'} accepted your offer! Trip to ${tripRequest?.destination || 'destination'} is confirmed.`,
+                    { requestId: offer.requestId }
+                );
+            }
         }
 
         res.json({ message: `Offer ${status}` });
     } catch (error) {
+        console.error('respond error:', error);
         res.status(500).json({ message: 'Error updating offer' });
     }
 });
@@ -606,16 +653,19 @@ app.post('/ratings', async (req, res) => {
         };
         await db.collection('ratings').insertOne(newRating);
         
-        // Also mark the request as completed if not already
+        // Mark request as completed — requestId is a string _id
         if (requestId) {
-            await db.collection('tripRequests').updateOne(
-                { _id: new ObjectId(requestId) },
-                { $set: { status: 'completed' } }
-            );
+            try {
+                await db.collection('tripRequests').updateOne(
+                    { _id: new ObjectId(requestId) },
+                    { $set: { status: 'completed' } }
+                );
+            } catch { /* invalid id format, skip */ }
         }
 
         res.status(201).json({ message: 'Rating submitted' });
     } catch (error) {
+        console.error('Rating error:', error);
         res.status(500).json({ message: 'Error submitting rating' });
     }
 });
@@ -636,6 +686,72 @@ app.get('/ratings/:providerId', async (req, res) => {
         res.json({ ratings, average: avgRating.toFixed(1), total: ratings.length });
     } catch (error) {
         res.status(500).json({ message: 'Error fetching ratings' });
+    }
+});
+
+// ==========================================
+//  NOTIFICATIONS
+// ==========================================
+
+// Get notifications for a user
+app.get('/notifications/:userId', async (req, res) => {
+    try {
+        const notifications = await notificationsCollection
+            .find({ recipientId: req.params.userId })
+            .sort({ createdAt: -1 })
+            .limit(20)
+            .toArray();
+        res.json(notifications);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching notifications' });
+    }
+});
+
+// Mark all notifications as read
+app.post('/notifications/mark-read/:userId', async (req, res) => {
+    try {
+        await notificationsCollection.updateMany(
+            { recipientId: req.params.userId, read: false },
+            { $set: { read: true } }
+        );
+        res.json({ message: 'Marked as read' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error marking read' });
+    }
+});
+
+// ==========================================
+//  TRIP CHAT
+// ==========================================
+
+// Get chat messages for a trip
+app.get('/trip-chat/:requestId', async (req, res) => {
+    try {
+        const messages = await tripChatCollection
+            .find({ requestId: req.params.requestId })
+            .sort({ createdAt: 1 })
+            .toArray();
+        res.json(messages);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching chat' });
+    }
+});
+
+// Send a chat message
+app.post('/trip-chat/:requestId', async (req, res) => {
+    const { senderId, senderName, text } = req.body;
+    try {
+        const msg = {
+            requestId: req.params.requestId,
+            senderId,
+            senderName,
+            text,
+            createdAt: new Date()
+        };
+        await tripChatCollection.insertOne(msg);
+        res.status(201).json(msg);
+    } catch (error) {
+        res.status(500).json({ message: 'Error sending message' });
     }
 });
 

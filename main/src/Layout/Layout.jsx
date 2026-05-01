@@ -1,6 +1,7 @@
 import { Outlet, Link } from "react-router-dom";
 import Navbar from "../Pages/NavBar/Navbar";
 import TripChat from "../Pages/AI/TripChat";
+import NotificationBell from "../Pages/Notifications/NotificationBell";
 
 const Layout = () => {
 	return (
@@ -26,8 +27,9 @@ const Layout = () => {
 							<span className="text-2xl font-bold gradient-text font-display group-hover:text-glow transition-all">Trippy 2.0</span>
 						</Link>
 					</div>
-					<div className="flex-none hidden lg:block">
+					<div className="flex-none hidden lg:flex items-center gap-1">
 						<Navbar />
+						<NotificationBell />
 					</div>
 				</div>
 

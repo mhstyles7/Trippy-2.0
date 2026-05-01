@@ -1,22 +1,28 @@
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
-import { Home, LogIn, UserPlus, Users, PenSquare, Briefcase, Plane, User, IdCard, CheckCircle, LogOut } from "lucide-react";
+import { NavLink, useLocation } from "react-router-dom";
+import { Home, LogIn, UserPlus, Users, PenSquare, ShoppingBag, Car, User, IdCard, CheckCircle, LogOut } from "lucide-react";
 
 // eslint-disable-next-line react/prop-types
 const Navbar = ({ isSidebar = false }) => {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
 	const [isVerified, setIsVerified] = useState(false);
-	const user = JSON.parse(localStorage.getItem("user") || "{}");
+	const [userRole, setUserRole] = useState('');
+	const location = useLocation();
 
+	// Re-read auth state on every route change (covers post-login redirect)
 	useEffect(() => {
+		const raw = localStorage.getItem("user");
+		const user = raw ? JSON.parse(raw) : null;
 		if (user && user._id) {
 			setIsLoggedIn(true);
 			setIsVerified(user.verifyOCR === true);
+			setUserRole(user.role || '');
 		} else {
 			setIsLoggedIn(false);
 			setIsVerified(false);
+			setUserRole('');
 		}
-	}, [user]);
+	}, [location.pathname]);
 
 	const linkClass = ({ isActive }) =>
 		`${isActive ? "bg-primary/20 text-primary font-bold" : "text-base-content/70 hover:text-primary hover:bg-primary/10"} transition-all duration-200 rounded-lg flex items-center gap-2`;
@@ -35,9 +41,12 @@ const Navbar = ({ isSidebar = false }) => {
 					<li><NavLink to="/friends" className={linkClass}><Users size={18} /> Friends</NavLink></li>
 					<li><NavLink to="/create" className={linkClass}><PenSquare size={18} /> Create</NavLink></li>
 					<li>
-						<NavLink to={user.role === 'carRentalUser' ? "/provider-dashboard" : "/traveler-dashboard"} className={linkClass}>
-							{user.role === 'carRentalUser' ? <Briefcase size={18} /> : <Plane size={18} />}
-							{user.role === 'carRentalUser' ? 'Business' : 'Trips'}
+						<NavLink
+							to={userRole === 'carRentalUser' ? "/provider-dashboard" : "/traveler-dashboard"}
+							className={linkClass}
+						>
+							{userRole === 'carRentalUser' ? <Car size={18} /> : <ShoppingBag size={18} />}
+							{userRole === 'carRentalUser' ? 'My Rentals' : 'Marketplace'}
 						</NavLink>
 					</li>
 					<li><NavLink to="/profile" className={linkClass}><User size={18} /> Profile</NavLink></li>
@@ -60,7 +69,10 @@ const Navbar = ({ isSidebar = false }) => {
 					)}
 					<li>
 						<NavLink
-							onClick={() => localStorage.removeItem("user")}
+							onClick={() => {
+								localStorage.removeItem("user");
+								setIsLoggedIn(false);
+							}}
 							to="/login"
 							className="text-error/70 hover:text-error hover:bg-error/10 transition-all duration-200 rounded-lg flex items-center gap-2"
 						>

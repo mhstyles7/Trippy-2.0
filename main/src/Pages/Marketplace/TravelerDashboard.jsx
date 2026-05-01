@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, Send, Sparkles } from 'lucide-react';
+import { Plus, Send, Sparkles, MessageCircle } from 'lucide-react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import TripMap from './TripMap';
+import TripChatModal from './TripChatModal';
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
 
 const TravelerDashboard = () => {
-    const [activeTab, setActiveTab] = useState('plans'); // 'plans' or 'inbox'
+    const [activeTab, setActiveTab] = useState('plans');
     const [myRequests, setMyRequests] = useState([]);
-    const [offers, setOffers] = useState({}); // Map requestId -> offers[]
+    const [offers, setOffers] = useState({});
     const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
     const [ratingData, setRatingData] = useState({ providerId: null, requestId: null, rating: 5, review: '' });
+    const [activeChatRequest, setActiveChatRequest] = useState(null); // { id, destination }
 
     // New Request Form State
     const [newRequest, setNewRequest] = useState({
@@ -146,9 +149,29 @@ const TravelerDashboard = () => {
                                     </div>
                                     
                                     {req.itinerary && (
-                                        <div className="mb-6 bg-primary/5 border border-primary/20 p-4 rounded-xl">
+                                        <div className="mb-4 bg-primary/5 border border-primary/20 p-4 rounded-xl">
                                             <h3 className="font-bold text-sm text-primary mb-2 flex items-center gap-2"><Sparkles size={16}/> AI Generated Itinerary</h3>
                                             <div className="text-sm opacity-80 whitespace-pre-wrap">{req.itinerary}</div>
+                                        </div>
+                                    )}
+
+                                    {/* Map for this trip */}
+                                    {req.destination && (
+                                        <div className="mb-4">
+                                            <p className="text-xs text-base-content/40 mb-2 uppercase tracking-wider">Destination Map</p>
+                                            <TripMap destination={req.destination} />
+                                        </div>
+                                    )}
+
+                                    {/* Chat button for booked/completed trips */}
+                                    {(req.status === 'booked' || req.status === 'completed') && (
+                                        <div className="mb-4">
+                                            <button
+                                                className="btn btn-sm btn-outline border-primary/30 text-primary hover:bg-primary/10 flex items-center gap-2"
+                                                onClick={() => setActiveChatRequest({ id: req._id, destination: req.destination })}
+                                            >
+                                                <MessageCircle size={14} /> Chat with Provider
+                                            </button>
                                         </div>
                                     )}
 
@@ -201,6 +224,15 @@ const TravelerDashboard = () => {
                     )}
                 </div>
             </div>
+
+            {activeChatRequest && (
+                <TripChatModal
+                    requestId={activeChatRequest.id}
+                    destination={activeChatRequest.destination}
+                    currentUser={user}
+                    onClose={() => setActiveChatRequest(null)}
+                />
+            )}
 
             {/* New Trip Modal */}
             <dialog id="new-trip-modal" className="modal">

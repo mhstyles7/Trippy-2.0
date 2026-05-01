@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Map, Car, CheckCircle, Tag, Plus, Send } from 'lucide-react';
+import { Map, Car, CheckCircle, Tag, Plus, Send, MessageCircle } from 'lucide-react';
+import TripChatModal from './TripChatModal';
 
 const ProviderDashboard = () => {
-    const [activeTab, setActiveTab] = useState('leads'); // 'leads' or 'garage'
+    const [activeTab, setActiveTab] = useState('leads');
     const [vehicles, setVehicles] = useState([]);
     const [leads, setLeads] = useState([]);
     const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
@@ -13,6 +14,7 @@ const ProviderDashboard = () => {
     const [bidPrice, setBidPrice] = useState('');
     const [bidMessage, setBidMessage] = useState('');
     const [selectedVehicleId, setSelectedVehicleId] = useState('');
+    const [activeChatRequest, setActiveChatRequest] = useState(null);
 
     // Garage Form State
     const [newVehicle, setNewVehicle] = useState({ name: '', type: 'Sedan', seats: 4, ac: true, pricePerDay: '', image: '' });
@@ -148,10 +150,19 @@ const ProviderDashboard = () => {
                                             <div><span className="opacity-50 block text-xs">DESCRIPTION</span>{lead.description}</div>
                                         </div>
 
-                                        <div className="card-actions justify-end mt-4">
-                                            <button className="btn btn-primary btn-sm flex items-center gap-2" onClick={() => openBidModal(lead)}>
-                                                <Tag size={16} /> Make an Offer
-                                            </button>
+                                        <div className="card-actions justify-end mt-4 flex gap-2 flex-wrap">
+                                            {lead.status === 'booked' ? (
+                                                <button
+                                                    className="btn btn-sm btn-outline border-success/30 text-success hover:bg-success/10 flex items-center gap-2"
+                                                    onClick={() => setActiveChatRequest({ id: lead._id, destination: lead.destination })}
+                                                >
+                                                    <MessageCircle size={14} /> Chat with Traveler
+                                                </button>
+                                            ) : (
+                                                <button className="btn btn-primary btn-sm flex items-center gap-2" onClick={() => openBidModal(lead)}>
+                                                    <Tag size={16} /> Make an Offer
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -218,6 +229,16 @@ const ProviderDashboard = () => {
                     </div>
                 )}
             </div>
+
+            {/* Trip Chat Modal */}
+            {activeChatRequest && (
+                <TripChatModal
+                    requestId={activeChatRequest.id}
+                    destination={activeChatRequest.destination}
+                    currentUser={user}
+                    onClose={() => setActiveChatRequest(null)}
+                />
+            )}
 
             {/* Bid Modal */}
             {showBidModal && selectedLead && (
