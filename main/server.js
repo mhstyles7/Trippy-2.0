@@ -172,12 +172,12 @@ app.get('/get-posts', async (req, res) => {
 // Get specific post by ID
 app.get('/get-specific-post/:id', async (req, res) => {
     try {
-        // Try ObjectId first, then fall back to post_id field
-        let post;
-        try {
-            post = await postsCollection.findOne({ _id: new ObjectId(req.params.id) });
-        } catch {
-            post = await postsCollection.findOne({ post_id: req.params.id });
+        const id = req.params.id;
+        // Always try post_id string match first (used by seeds and new posts)
+        let post = await postsCollection.findOne({ post_id: id });
+        // Then try ObjectId on _id
+        if (!post) {
+            try { post = await postsCollection.findOne({ _id: new ObjectId(id) }); } catch {}
         }
         if (post) {
             res.json(post);
@@ -847,6 +847,23 @@ app.get('/get-users', async (req, res) => {
         res.json(users);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching users' });
+    }
+});
+
+// ==========================================
+//  SITE STATS (live counts for home page)
+// ==========================================
+app.get('/site-stats', async (req, res) => {
+    try {
+        const [users, posts, trips, ratings] = await Promise.all([
+            usersCollection.countDocuments(),
+            postsCollection.countDocuments(),
+            db.collection('tripRequests').countDocuments({ status: 'open' }),
+            db.collection('ratings').countDocuments(),
+        ]);
+        res.json({ users, posts, trips, ratings });
+    } catch (error) {
+        res.status(500).json({ users: 0, posts: 0, trips: 0, ratings: 0 });
     }
 });
 

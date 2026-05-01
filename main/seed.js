@@ -105,8 +105,9 @@ async function seed() {
     // ── POSTS ──
     const posts = postData.map((p, i) => {
       const user = allUsers.find(u => u._id.equals(ID(p.uid)));
+      const postId = new ObjectId();
       return {
-        _id: new ObjectId(), post_id: new ObjectId().toString(),
+        _id: postId, post_id: postId.toString(),   // same ID — both lookup paths work
         userId: user._id.toString(), userName: user.name, userPhotoURL: user.photoURL, userVerified: user.verifyOCR,
         title: p.title, description: p.desc,
         images: p.imgs.map(id => UNSPLASH(id)),
