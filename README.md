@@ -1,6 +1,6 @@
 # 🚀 Trippy 2.0
 
-Trippy 2.0 is a modern, full-stack travel marketplace and social community platform. It connects travelers with car rental providers, combining a social feed with a real-time bidding engine, AI tools, live maps, and in-trip messaging.
+Trippy 2.0 is a modern, full-stack travel marketplace and social community platform. It connects travelers with car rental providers, combining a social feed with a real-time bidding engine, AI tools, live maps, and a dual messaging system — friend DMs and in-trip coordination chat.
 
 ---
 
@@ -16,6 +16,7 @@ Trippy 2.0 is a modern, full-stack travel marketplace and social community platf
 - Travel feed with rich photo galleries and image lightbox
 - Full commenting system on posts
 - Friend connections — send, accept, and manage requests
+- **Friend Direct Messages (DM)** — click the message icon next to any friend to open a private real-time chat
 - Profile pages with bio, post count, role, and verification status
 - **Profile picture upload** (file upload, not URL)
 
@@ -36,9 +37,10 @@ Trippy 2.0 is a modern, full-stack travel marketplace and social community platf
 - Browse all open traveler trip requests
 - Submit custom-priced offers with vehicle details and a personal pitch
 
-### 💬 Real-Time Communication
-- **Global notification bell** — alerts for friend requests, new offers, accepted bookings
-- **In-trip private chat** — unlocks after a trip is booked, polling every 4 seconds
+### 💬 Real-Time Messaging
+- **Friend DM Chat** — private message any friend directly from the Friends page; unread badge counts update live every 5 seconds
+- **In-Trip Chat** — a dedicated chat channel between traveler and provider unlocks automatically once a booking is confirmed, polling every 3 seconds
+- **Global notification bell** — alerts for friend requests, new offers, and accepted bookings
 
 ### 🤖 AI Travel Assistant
 - Floating global chatbot powered by **Google Gemini 2.0 Flash**

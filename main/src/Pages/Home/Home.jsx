@@ -56,8 +56,8 @@ const Home = () => {
 		},
 		{
 			icon: <MessageCircle size={36} className="text-secondary" />,
-			title: "In-Trip Chat",
-			desc: "Once a trip is booked, a private chat channel opens between the traveler and provider for seamless coordination.",
+			title: "Real-Time Messaging",
+			desc: "DM any friend directly from the Friends page, and get a dedicated trip chat with your provider the moment a booking is confirmed.",
 		},
 		{
 			icon: <ShieldCheck size={36} className="text-accent" />,
