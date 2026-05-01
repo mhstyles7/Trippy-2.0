@@ -2,7 +2,8 @@ import API_BASE from '../../api';
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, Globe, Mail, Inbox, Users, Send, Check, X, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Sparkles, Globe, Mail, Inbox, Users, Send, Check, X, AlertCircle, CheckCircle2, MessageCircle } from "lucide-react";
+import FriendChatModal from "./FriendChatModal";
 
 export default function Friends() {
 	const [suggestions, setSuggestions] = useState([]);
@@ -12,6 +13,8 @@ export default function Friends() {
 	const [errorMessage, setErrorMessage] = useState("");
 	const [successMessage, setSuccessMessage] = useState("");
 	const [loading, setLoading] = useState(false);
+	const [activeChatFriend, setActiveChatFriend] = useState(null);
+	const [unreadCounts, setUnreadCounts] = useState({});
 	const user = JSON.parse(localStorage.getItem("user") || "{}");
 	const userId = user._id;
 	const navigate = useNavigate();
@@ -21,60 +24,52 @@ export default function Friends() {
 		try {
 			const res = await axios.get(`${API_BASE}/friend-suggestions/${userId}`);
 			setSuggestions(res.data);
-		} catch (err) {
-			setErrorMessage("Error fetching suggestions");
-		} finally {
-			setLoading(false);
-		}
+		} catch { setErrorMessage("Error fetching suggestions"); }
+		finally { setLoading(false); }
 	};
 
 	const fetchReceivedRequests = async () => {
 		try {
 			const res = await axios.get(`${API_BASE}/received-requests/${userId}`);
 			setReceivedRequests(res.data);
-		} catch (err) {
-			setErrorMessage("Error fetching received requests");
-		}
+		} catch { setErrorMessage("Error fetching received requests"); }
 	};
 
 	const fetchSentRequests = async () => {
 		try {
 			const res = await axios.get(`${API_BASE}/sent-requests/${userId}`);
 			setSentRequests(res.data);
-		} catch (err) {
-			setErrorMessage("Error fetching sent requests");
-		}
+		} catch { setErrorMessage("Error fetching sent requests"); }
 	};
 
 	const fetchFriends = async () => {
 		try {
 			const res = await axios.get(`${API_BASE}/friends/${userId}`);
 			setFriends(res.data);
-		} catch (err) {
-			setErrorMessage("Error fetching friends");
-		}
+		} catch { setErrorMessage("Error fetching friends"); }
+	};
+
+	const fetchUnread = async () => {
+		try {
+			const res = await axios.get(`${API_BASE}/friend-chat/unread/${userId}`);
+			setUnreadCounts(res.data);
+		} catch { /* silent */ }
 	};
 
 	const sendFriendRequest = async (receiverId) => {
 		try {
 			await axios.post(`${API_BASE}/friend-request`, { senderId: userId, receiverId });
 			setSuccessMessage("Friend request sent!");
-			fetchSuggestions();
-			fetchSentRequests();
-		} catch (err) {
-			setErrorMessage("Error sending friend request");
-		}
+			fetchSuggestions(); fetchSentRequests();
+		} catch { setErrorMessage("Error sending friend request"); }
 	};
 
 	const acceptRequest = async (senderId) => {
 		try {
 			await axios.post(`${API_BASE}/accept-request`, { userId, senderId });
 			setSuccessMessage("Friend request accepted!");
-			fetchReceivedRequests();
-			fetchFriends();
-		} catch (err) {
-			setErrorMessage("Error accepting request");
-		}
+			fetchReceivedRequests(); fetchFriends();
+		} catch { setErrorMessage("Error accepting request"); }
 	};
 
 	const rejectRequest = async (requesterId) => {
@@ -82,9 +77,7 @@ export default function Friends() {
 			await axios.post(`${API_BASE}/reject-request`, { userId, requesterId });
 			setSuccessMessage("Request declined");
 			fetchReceivedRequests();
-		} catch (err) {
-			setErrorMessage("Error rejecting request");
-		}
+		} catch { setErrorMessage("Error rejecting request"); }
 	};
 
 	const removeFriend = async (friendId) => {
@@ -92,9 +85,7 @@ export default function Friends() {
 			await axios.post(`${API_BASE}/remove-friend`, { userId, friendId });
 			setSuccessMessage("Friend removed");
 			fetchFriends();
-		} catch (err) {
-			setErrorMessage("Error removing friend");
-		}
+		} catch { setErrorMessage("Error removing friend"); }
 	};
 
 	useEffect(() => {
@@ -105,6 +96,9 @@ export default function Friends() {
 			fetchReceivedRequests();
 			fetchSentRequests();
 			fetchFriends();
+			fetchUnread();
+			const interval = setInterval(fetchUnread, 5000);
+			return () => clearInterval(interval);
 		}
 	}, [userId]);
 
@@ -153,12 +147,12 @@ export default function Friends() {
 								{suggestions.map((s) => (
 									<div key={s._id} className="glass-card p-5 flex flex-col items-center text-center group">
 										<div className="avatar mb-3">
-											<div className="w-20 h-20 rounded-full ring-2 ring-primary/30 ring-offset-base-100 ring-offset-2 group-hover:ring-primary transition-all">
-												<img src={s.photoURL || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"} alt={s.name} />
+											<div className="w-20 h-20 rounded-full ring-2 ring-primary/30 ring-offset-base-100 ring-offset-2 group-hover:ring-primary transition-all overflow-hidden">
+												<img src={s.photoURL || `https://api.dicebear.com/7.x/adventurer/svg?seed=${s.name}`} alt={s.name} />
 											</div>
 										</div>
 										<h3 className="font-bold text-sm mb-1">{s.name}</h3>
-										<p className="text-xs text-base-content/40 mb-4">Traveler</p>
+										<p className="text-xs text-base-content/40 mb-4">{s.role === 'carRentalUser' ? 'Provider' : 'Traveler'}</p>
 										<button className="btn btn-primary btn-sm btn-gradient btn-block" onClick={() => sendFriendRequest(s._id)}>
 											Add Friend
 										</button>
@@ -191,8 +185,8 @@ export default function Friends() {
 										<div key={r._id} className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors">
 											<div className="flex items-center gap-4">
 												<div className="avatar">
-													<div className="w-12 h-12 rounded-full ring-1 ring-white/10">
-														<img src={r.photoURL || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"} alt={r.name} />
+													<div className="w-12 h-12 rounded-full ring-1 ring-white/10 overflow-hidden">
+														<img src={r.photoURL || `https://api.dicebear.com/7.x/adventurer/svg?seed=${r.name}`} alt={r.name} />
 													</div>
 												</div>
 												<span className="font-bold text-sm">{r.name}</span>
@@ -233,16 +227,30 @@ export default function Friends() {
 										<div key={f._id} className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors">
 											<div className="flex items-center gap-4">
 												<div className="avatar">
-													<div className="w-12 h-12 rounded-full ring-1 ring-accent/30">
-														<img src={f.photoURL || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"} alt={f.name} />
+													<div className="w-12 h-12 rounded-full ring-1 ring-accent/30 overflow-hidden">
+														<img src={f.photoURL || `https://api.dicebear.com/7.x/adventurer/svg?seed=${f.name}`} alt={f.name} />
 													</div>
 												</div>
 												<div>
 													<span className="font-bold text-sm block">{f.name}</span>
-													<span className="text-xs text-base-content/30">Online</span>
+													<span className="text-xs text-base-content/30">{f.role === 'carRentalUser' ? 'Provider' : 'Traveler'}</span>
 												</div>
 											</div>
-											<button className="btn btn-ghost btn-xs text-error/60 hover:text-error hover:bg-error/10" onClick={() => removeFriend(f._id)}>Unfriend</button>
+											<div className="flex items-center gap-2">
+												<button
+													className="relative btn btn-ghost btn-circle btn-sm text-primary/60 hover:text-primary hover:bg-primary/10"
+													onClick={() => setActiveChatFriend(f)}
+													title="Send Message"
+												>
+													<MessageCircle size={16} />
+													{unreadCounts[f._id] > 0 && (
+														<span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary rounded-full text-[9px] text-white flex items-center justify-center font-bold">
+															{unreadCounts[f._id]}
+														</span>
+													)}
+												</button>
+												<button className="btn btn-ghost btn-xs text-error/60 hover:text-error hover:bg-error/10" onClick={() => removeFriend(f._id)}>Unfriend</button>
+											</div>
 										</div>
 									))}
 								</div>
@@ -270,8 +278,8 @@ export default function Friends() {
 								{sentRequests.map((r) => (
 									<div key={r._id} className="flex items-center gap-3 p-3 bg-white/[0.03] rounded-xl">
 										<div className="avatar">
-											<div className="w-8 h-8 rounded-full">
-												<img src={r.photoURL || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"} alt={r.name} />
+											<div className="w-8 h-8 rounded-full overflow-hidden">
+												<img src={r.photoURL || `https://api.dicebear.com/7.x/adventurer/svg?seed=${r.name}`} alt={r.name} />
 											</div>
 										</div>
 										<span className="text-sm font-medium">{r.name}</span>
@@ -285,6 +293,18 @@ export default function Friends() {
 					</div>
 				</div>
 			</div>
+
+			{/* Friend DM Chat Modal */}
+			{activeChatFriend && (
+				<FriendChatModal
+					friend={activeChatFriend}
+					currentUser={user}
+					onClose={() => {
+						setActiveChatFriend(null);
+						fetchUnread();
+					}}
+				/>
+			)}
 		</div>
 	);
 }

@@ -35,7 +35,8 @@ const client = new MongoClient(uri, {
     family: 4
 });
 
-let db, usersCollection, postsCollection, commentsCollection, notificationsCollection, tripChatCollection;
+let db, usersCollection, postsCollection, commentsCollection, notificationsCollection, tripChatCollection, friendMessagesCollection;
+
 
 async function connectDB() {
     try {
@@ -46,7 +47,9 @@ async function connectDB() {
         commentsCollection = db.collection('comments');
         notificationsCollection = db.collection('notifications');
         tripChatCollection = db.collection('tripChat');
+        friendMessagesCollection = db.collection('friendMessages');
         console.log('✅ Connected to MongoDB');
+
     } catch (error) {
         console.error('❌ MongoDB Connection Error:', error);
     }
@@ -865,6 +868,67 @@ app.get('/get-users', async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Error fetching users' });
     }
+});
+
+// ==========================================
+//  FRIEND DIRECT MESSAGES
+// ==========================================
+const friendRoomId = (a, b) => [String(a), String(b)].sort().join('_');
+
+// GET all messages in a room
+app.get('/friend-chat/:roomId', async (req, res) => {
+    try {
+        const messages = await friendMessagesCollection
+            .find({ roomId: req.params.roomId })
+            .sort({ createdAt: 1 })
+            .toArray();
+        res.json(messages);
+    } catch { res.status(500).json({ message: 'Error fetching messages' }); }
+});
+
+// POST a new message
+app.post('/friend-chat/:roomId', async (req, res) => {
+    const { senderId, senderName, senderPhoto, receiverId, text } = req.body;
+    if (!text?.trim()) return res.status(400).json({ message: 'Empty message' });
+    try {
+        const msg = {
+            roomId: req.params.roomId,
+            senderId, senderName,
+            senderPhoto: senderPhoto || '',
+            receiverId,
+            text: text.trim(),
+            read: false,
+            createdAt: new Date(),
+        };
+        const result = await friendMessagesCollection.insertOne(msg);
+        msg._id = result.insertedId;
+        res.status(201).json(msg);
+    } catch { res.status(500).json({ message: 'Error sending message' }); }
+});
+
+// GET unread counts for a user (map of senderId → count)
+app.get('/friend-chat/unread/:userId', async (req, res) => {
+    try {
+        const unread = await friendMessagesCollection.aggregate([
+            { $match: { receiverId: req.params.userId, read: false } },
+            { $group: { _id: '$senderId', count: { $sum: 1 } } },
+        ]).toArray();
+        const map = {};
+        unread.forEach(u => { map[u._id] = u.count; });
+        res.json(map);
+    } catch { res.status(500).json({}); }
+});
+
+// PATCH mark messages as read
+app.patch('/friend-chat/:roomId/read', async (req, res) => {
+    const { userId } = req.body;
+    try {
+        await friendMessagesCollection.updateMany(
+            { roomId: req.params.roomId, receiverId: userId, read: false },
+            { $set: { read: true } }
+        );
+        res.json({ ok: true });
+    } catch { res.status(500).json({ message: 'Error marking read' }); }
 });
 
 // ==========================================
