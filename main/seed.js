@@ -1,519 +1,236 @@
-/**
- * Trippy 2.0 — Database Seeder
- * Run: node seed.js
- *
- * Seeds:
- *   users         — 1 traveler + 1 car rental provider (with full OCR verification)
- *   posts         — 3 travel posts by the traveler
- *   comments      — 2 comments on each post
- *   vehicles      — 2 vehicles owned by the provider
- *   tripRequests  — 1 open trip request + 1 booked trip request
- *   rentalOffers  — 1 pending offer + 1 accepted offer (tied to the booked request)
- *   tripChat      — a few pre-seeded chat messages on the booked trip
- *   ratings       — 1 completed rating on the booked trip
- *   notifications — sample notifications for both users
- */
-
 import { MongoClient, ObjectId } from 'mongodb';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const uri = process.env.MONGO_URI;
-const client = new MongoClient(uri, { serverSelectionTimeoutMS: 5000, family: 4 });
+const client = new MongoClient(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000, family: 4 });
 
-// ── Deterministic IDs so references work ─────────────────────────────────────
-const TRAVELER_ID   = new ObjectId('aaaaaaaaaaaaaaaaaaaaaaaa');
-const PROVIDER_ID   = new ObjectId('bbbbbbbbbbbbbbbbbbbbbbbb');
-const POST_1_ID     = new ObjectId('cccccccccccccccccccccccc');
-const POST_2_ID     = new ObjectId('dddddddddddddddddddddddd');
-const POST_3_ID     = new ObjectId('eeeeeeeeeeeeeeeeeeeeeeee');
-const VEHICLE_1_ID  = new ObjectId('ffffffffffffffffffffffff');
-const VEHICLE_2_ID  = new ObjectId('111111111111111111111111');
-const OPEN_REQ_ID   = new ObjectId('222222222222222222222222');
-const BOOKED_REQ_ID = new ObjectId('333333333333333333333333');
-const OFFER_1_ID    = new ObjectId('444444444444444444444444'); // pending on open request
-const OFFER_2_ID    = new ObjectId('555555555555555555555555'); // accepted on booked request
-const RATING_ID     = new ObjectId('666666666666666666666666');
+// Helper to make deterministic IDs
+const ID = (hex) => new ObjectId(hex.padEnd(24, '0'));
 
-// Additional IDs
-const TRAVELER_2_ID = new ObjectId('777777777777777777777777');
-const TRAVELER_3_ID = new ObjectId('888888888888888888888888');
-const PROVIDER_2_ID = new ObjectId('999999999999999999999999');
-const POST_4_ID     = new ObjectId('aaaaaaaaaaaaaaaaaaaaaaab');
-const POST_5_ID     = new ObjectId('bbbbbbbbbbbbbbbbbbbbbbbc');
-const OPEN_REQ_2_ID = new ObjectId('cccccccccccccccccccccccd');
+// ── USER DATA ────────────────────────────────────────────────────────────────
+const travelers = [
+  { id: ID('a1'), name: 'Aryan Rahman',    email: 'aryan@trippy.com',    bio: 'Backpacker | 30+ countries 🌍', verified: true, docType: 'NID' },
+  { id: ID('a2'), name: 'Sarah Chowdhury', email: 'sarah@trippy.com',    bio: 'Solo traveler | Foodie 🍜',      verified: true, docType: 'Passport' },
+  { id: ID('a3'), name: 'Faiz Ahmed',      email: 'faiz@trippy.com',     bio: 'Weekend trekker ⛰️',             verified: true, docType: 'NID' },
+  { id: ID('a4'), name: 'Nadia Islam',     email: 'nadia@trippy.com',    bio: 'Photography lover 📸',           verified: true, docType: 'NID' },
+  { id: ID('a5'), name: 'Tanvir Hasan',    email: 'tanvir@trippy.com',   bio: 'Road trip addict 🛣️',            verified: false },
+  { id: ID('a6'), name: 'Maliha Akter',    email: 'maliha@trippy.com',   bio: 'Cultural explorer 🎭',           verified: true, docType: 'Passport' },
+  { id: ID('a7'), name: 'Rahat Khan',      email: 'rahat@trippy.com',    bio: 'Budget traveler 💰',             verified: false },
+  { id: ID('a8'), name: 'Priya Das',       email: 'priya@trippy.com',    bio: 'Nature & wildlife 🦜',           verified: true, docType: 'NID' },
+  { id: ID('a9'), name: 'Imran Siddiqui',  email: 'imran@trippy.com',    bio: 'History buff 🏛️',                verified: false },
+  { id: ID('aa'), name: 'Fatima Begum',    email: 'fatima@trippy.com',   bio: 'Family travel expert 👨‍👩‍👧‍👦',        verified: true, docType: 'NID' },
+];
+
+const providers = [
+  { id: ID('b1'), name: 'Karim Hossain',      email: 'karim@trippy.com',  bio: '🚗 Premium rentals — Dhaka & Sylhet', verified: true, docType: 'Driving License' },
+  { id: ID('b2'), name: 'Jamil Rent-A-Car',   email: 'jamil@trippy.com',  bio: 'Luxury SUVs & sedans for rent',       verified: true, docType: 'Trade License' },
+  { id: ID('b3'), name: 'Rahim Transport',    email: 'rahim@trippy.com',  bio: 'Long-distance travel specialist 🚐',  verified: true, docType: 'Driving License' },
+  { id: ID('b4'), name: 'Dhaka Car Rentals',  email: 'dhakacar@trippy.com', bio: 'Trusted since 2015',                verified: true, docType: 'Trade License' },
+  { id: ID('b5'), name: 'Safar Rides',        email: 'safar@trippy.com',  bio: 'Comfort meets affordability',         verified: false },
+];
+
+// ── POSTS DATA ───────────────────────────────────────────────────────────────
+const postData = [
+  { uid: 'a1', title: 'Lost in the Tea Gardens of Sylhet 🍃', desc: "Seven days in Sylhet's rolling tea estates. The mist at dawn is pure magic.", imgs: ['photo-1506905925346-21bda4d32df4', 'photo-1544735716-392fe2489ffa'] },
+  { uid: 'a1', title: "Cox's Bazar at Sunset 🌅", desc: '120km of coastline and the most beautiful sunset I have ever witnessed.', imgs: ['photo-1507525428034-b723cf961d3e', 'photo-1519046904884-53103b34b206'] },
+  { uid: 'a1', title: 'Sundarbans: Into the Mangroves 🐯', desc: "The world's largest mangrove forest. Every shadow might be a Royal Bengal Tiger.", imgs: ['photo-1576443183726-8e7cce8d9e28'] },
+  { uid: 'a2', title: 'Old Dhaka Street Food Tour 🚲', desc: 'Found the best biryani hidden in a narrow alley. The chaos is the charm.', imgs: ['photo-1567337710282-00832b415979'] },
+  { uid: 'a3', title: 'Trekking Keokradong ⛰️', desc: 'Exhausting hike but the panoramic view from the top made it all worth it.', imgs: ['photo-1542385311-fb31e9c5220c'] },
+  { uid: 'a4', title: 'Golden Hour at Jaflong 📸', desc: 'Crystal clear waters of the Piyain River with the Khasi Hills in the background.', imgs: ['photo-1501785888041-af3ef285b470'] },
+  { uid: 'a6', title: 'The Buddhist Temples of Ramu 🛕', desc: 'A hidden cultural gem near Cox Bazar. Ancient temples surrounded by lush greenery.', imgs: ['photo-1548013146-72479768bada'] },
+  { uid: 'a8', title: 'Bird Watching at Tanguar Haor 🦜', desc: 'Spotted over 20 species in one morning. The wetlands are a birder paradise.', imgs: ['photo-1470071459604-3b5ec3a7fe05'] },
+  { uid: 'aa', title: 'Family Trip to Bandarban 🏔️', desc: 'Nilgiri hilltop with the kids. Cloud-level views and unforgettable memories.', imgs: ['photo-1464822759023-fed622ff2c3b'] },
+  { uid: 'a5', title: 'Road Trip: Dhaka to Rangamati 🛣️', desc: '6 hours of winding hill roads and lakeside views. Pure driving bliss.', imgs: ['photo-1469854523086-cc02fe5d8800'] },
+];
+
+// ── VEHICLES DATA ────────────────────────────────────────────────────────────
+const vehicleData = [
+  { pid: 'b1', name: 'Toyota Noah 7-Seater', type: 'Microbus', seats: 7,  ac: true,  price: 4500, img: 'photo-1544636331-e26879cd4d9b' },
+  { pid: 'b1', name: 'Toyota Hiace 11-Seat', type: 'Minivan', seats: 11, ac: true,  price: 7000, img: 'photo-1558618666-fcd25c85cd64' },
+  { pid: 'b2', name: 'Toyota Land Cruiser',  type: 'SUV',      seats: 5,  ac: true,  price: 9000, img: 'photo-1533473359331-2f2db1bba37e' },
+  { pid: 'b2', name: 'Honda Civic Sedan',    type: 'Sedan',    seats: 4,  ac: true,  price: 3500, img: 'photo-1549317661-bd32c8ce0ffe' },
+  { pid: 'b3', name: 'Mitsubishi Pajero',    type: 'SUV',      seats: 7,  ac: true,  price: 6500, img: 'photo-1519641471654-76ce0107ad1b' },
+  { pid: 'b4', name: 'Hyundai H1 Van',       type: 'Minivan',  seats: 9,  ac: true,  price: 5500, img: 'photo-1494976388531-d1058494cdd8' },
+  { pid: 'b5', name: 'Suzuki APV',           type: 'Microbus', seats: 8,  ac: false, price: 3000, img: 'photo-1449965408869-eaa3f722e40d' },
+];
+
+// ── TRIP REQUEST DATA ────────────────────────────────────────────────────────
+const tripData = [
+  { tid: 'a1', dest: 'Sylhet', dates: 'Jun 10–15', group: '4', budget: '15000', vtype: 'Microbus', desc: 'Tea gardens, Ratargul, Jaflong. Need AC.', status: 'open' },
+  { tid: 'a1', dest: "Cox's Bazar", dates: 'Apr 20–24', group: '6', budget: '25000', vtype: 'Minivan', desc: 'Beach trip with family.', status: 'booked' },
+  { tid: 'a2', dest: 'Sajek Valley', dates: 'May 15–18', group: '2', budget: '10000', vtype: 'Sedan', desc: 'Khagrachari to Sajek round trip.', status: 'open' },
+  { tid: 'a4', dest: 'Bandarban', dates: 'Jul 1–5', group: '3', budget: '18000', vtype: 'SUV', desc: 'Nilgiri, Nafakhum waterfall trek.', status: 'open' },
+  { tid: 'a6', dest: 'Rangamati', dates: 'Aug 10–13', group: '5', budget: '20000', vtype: 'Microbus', desc: 'Lake cruise + Shuvolong falls.', status: 'open' },
+  { tid: 'aa', dest: 'Sundarbans', dates: 'Sep 5–8', group: '8', budget: '35000', vtype: 'Minivan', desc: 'Family boat tour of the Sundarbans.', status: 'open' },
+];
+
+const UNSPLASH = (id) => `https://images.unsplash.com/${id}?w=800&q=80`;
+const AVATAR = (seed) => `https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`;
 
 async function seed() {
-    try {
-        await client.connect();
-        const db = client.db('trippy');
-        console.log('✅ Connected to MongoDB — starting seed...\n');
+  try {
+    await client.connect();
+    const db = client.db('trippy');
+    console.log('✅ Connected\n');
 
-        // ── Drop existing data ──────────────────────────────────────────────
-        const collections = [
-            'users', 'posts', 'comments', 'vehicles',
-            'tripRequests', 'rentalOffers', 'ratings',
-            'notifications', 'tripChat', 'verifications'
-        ];
-        for (const col of collections) {
-            try { await db.collection(col).drop(); } catch { /* doesn't exist yet */ }
-        }
-        console.log('🗑️  Cleared existing collections\n');
-
-        // ── USERS ──────────────────────────────────────────────────────────
-        const users = [
-            {
-                _id: TRAVELER_ID,
-                name: 'Aryan Rahman',
-                email: 'traveler@trippy.com',
-                password: 'test1234',          // plain text — matches server login logic
-                role: 'traveler',
-                photoURL: 'https://api.dicebear.com/7.x/adventurer/svg?seed=aryan',
-                bio: 'Backpacker | Photography lover | 30+ countries visited 🌍',
-                verifyOCR: true,
-                verifiedDocType: 'NID',
-                verifiedIdNumber: 'NID-1234567890',
-                friends: [PROVIDER_ID],
-                friendRequests: [],
-                sentRequests: [],
-                createdAt: new Date('2025-01-15'),
-            },
-            {
-                _id: PROVIDER_ID,
-                name: 'Md. Karim Hossain',
-                email: 'provider@trippy.com',
-                password: 'test1234',
-                role: 'carRentalUser',
-                photoURL: 'https://api.dicebear.com/7.x/adventurer/svg?seed=karim',
-                bio: '🚗 Premium vehicle rental service — Dhaka & Sylhet | 10+ years exp',
-                verifyOCR: true,
-                verifiedDocType: 'Driving License',
-                verifiedIdNumber: 'DL-9876543210',
-                friends: [TRAVELER_ID],
-                friendRequests: [],
-                sentRequests: [],
-                createdAt: new Date('2025-02-01'),
-            },
-            {
-                _id: TRAVELER_2_ID,
-                name: 'Sarah Rahman',
-                email: 'sarah@trippy.com',
-                password: 'test1234',
-                role: 'traveler',
-                photoURL: 'https://api.dicebear.com/7.x/adventurer/svg?seed=sarah',
-                bio: 'Solo traveler | Foodie | Exploring BD',
-                verifyOCR: true,
-                verifiedDocType: 'Passport',
-                verifiedIdNumber: 'P-11223344',
-                friends: [],
-                friendRequests: [TRAVELER_ID],
-                sentRequests: [],
-                createdAt: new Date('2025-01-20'),
-            },
-            {
-                _id: TRAVELER_3_ID,
-                name: 'Faiz Ahmed',
-                email: 'faiz@trippy.com',
-                password: 'test1234',
-                role: 'traveler',
-                photoURL: 'https://api.dicebear.com/7.x/adventurer/svg?seed=faiz',
-                bio: 'Weekend explorer | Trekking enthusiast',
-                verifyOCR: false,
-                friends: [],
-                friendRequests: [],
-                sentRequests: [TRAVELER_ID],
-                createdAt: new Date('2025-03-05'),
-            },
-            {
-                _id: PROVIDER_2_ID,
-                name: 'Jamil Rent-A-Car',
-                email: 'jamil@trippy.com',
-                password: 'test1234',
-                role: 'carRentalUser',
-                photoURL: 'https://api.dicebear.com/7.x/adventurer/svg?seed=jamil',
-                bio: 'Luxury SUVs and sedans for rent. Safe and reliable.',
-                verifyOCR: true,
-                verifiedDocType: 'Trade License',
-                verifiedIdNumber: 'TL-55667788',
-                friends: [],
-                friendRequests: [],
-                sentRequests: [],
-                createdAt: new Date('2025-04-10'),
-            }
-        ];
-        await db.collection('users').insertMany(users);
-        console.log('👤 Seeded 5 users:');
-        console.log('   📧 traveler@trippy.com  | password: test1234  | Role: Traveler');
-        console.log('   📧 provider@trippy.com  | password: test1234  | Role: Car Rental Provider');
-        console.log('   📧 sarah@trippy.com     | password: test1234  | Role: Traveler');
-        console.log('   📧 faiz@trippy.com      | password: test1234  | Role: Traveler');
-        console.log('   📧 jamil@trippy.com     | password: test1234  | Role: Car Rental Provider\n');
-
-        // ── VERIFICATIONS ──────────────────────────────────────────────────
-        await db.collection('verifications').insertMany([
-            {
-                userId: TRAVELER_ID.toString(),
-                documentType: 'NID',
-                idNumber: 'NID-1234567890',
-                holderName: 'Aryan Rahman',
-                verifiedAt: new Date('2025-01-20'),
-            },
-            {
-                userId: PROVIDER_ID.toString(),
-                documentType: 'Driving License',
-                idNumber: 'DL-9876543210',
-                holderName: 'Md. Karim Hossain',
-                verifiedAt: new Date('2025-02-05'),
-            }
-        ]);
-
-        // ── POSTS ──────────────────────────────────────────────────────────
-        const posts = [
-            {
-                _id: POST_1_ID,
-                post_id: POST_1_ID.toString(),
-                userId: TRAVELER_ID.toString(),
-                userName: 'Aryan Rahman',
-                userPhotoURL: 'https://api.dicebear.com/7.x/adventurer/svg?seed=aryan',
-                userVerified: true,
-                title: 'Lost in the Tea Gardens of Sylhet 🍃',
-                description: 'Seven days, zero plans, and a rucksack full of instant noodles. Sylhet\'s rolling tea estates at dawn are the most peaceful thing I\'ve ever witnessed. The mist clings to the rows of bushes like a whisper. Absolutely breathtaking.',
-                images: [
-                    'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800',
-                    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',
-                ],
-                comments: [],
-                createdAt: new Date('2025-03-10'),
-            },
-            {
-                _id: POST_2_ID,
-                post_id: POST_2_ID.toString(),
-                userId: TRAVELER_ID.toString(),
-                userName: 'Aryan Rahman',
-                userPhotoURL: 'https://api.dicebear.com/7.x/adventurer/svg?seed=aryan',
-                userVerified: true,
-                title: 'Cox\'s Bazar at Sunset — The World\'s Longest Beach 🌅',
-                description: 'Nothing prepares you for the scale of Cox\'s Bazar. 120km of uninterrupted coastline, the sun dropping into the Bay of Bengal, and the sound of waves that feel like they\'ve traveled all the way from the Indian Ocean just to greet you.',
-                images: [
-                    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800',
-                    'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=800',
-                ],
-                comments: [],
-                createdAt: new Date('2025-04-02'),
-            },
-            {
-                _id: POST_3_ID,
-                post_id: POST_3_ID.toString(),
-                userId: TRAVELER_ID.toString(),
-                userName: 'Aryan Rahman',
-                userPhotoURL: 'https://api.dicebear.com/7.x/adventurer/svg?seed=aryan',
-                userVerified: true,
-                title: 'Sundarbans: Into the Heart of the Mangroves 🐯',
-                description: "You don't visit the Sundarbans — you enter it. The world's largest mangrove forest is alive in a way that's difficult to articulate. Every ripple in the water could be a dolphin or a ghost. Every shadow in the trees might be a Royal Bengal Tiger. I loved every terrifying second.",
-                images: [
-                    'https://images.unsplash.com/photo-1576443183726-8e7cce8d9e28?w=800',
-                ],
-                comments: [],
-                createdAt: new Date('2025-04-20'),
-            },
-            {
-                _id: POST_4_ID,
-                post_id: POST_4_ID.toString(),
-                userId: TRAVELER_2_ID.toString(),
-                userName: 'Sarah Rahman',
-                userPhotoURL: 'https://api.dicebear.com/7.x/adventurer/svg?seed=sarah',
-                userVerified: true,
-                title: 'Strolling through old Dhaka 🚲',
-                description: "The food, the chaos, the rickshaws. Old Dhaka is an experience like no other. Found this amazing biryani place hidden in a narrow alley.",
-                images: [
-                    'https://images.unsplash.com/photo-1627850818228-56eb00921a8a?w=800',
-                ],
-                comments: [],
-                createdAt: new Date('2025-04-25'),
-            },
-            {
-                _id: POST_5_ID,
-                post_id: POST_5_ID.toString(),
-                userId: TRAVELER_3_ID.toString(),
-                userName: 'Faiz Ahmed',
-                userPhotoURL: 'https://api.dicebear.com/7.x/adventurer/svg?seed=faiz',
-                userVerified: false,
-                title: 'Trekking Keokradong ⛰️',
-                description: "Made it to the top! The hike was exhausting but the view from Keokradong is absolutely worth every drop of sweat.",
-                images: [
-                    'https://images.unsplash.com/photo-1542385311-fb31e9c5220c?w=800',
-                ],
-                comments: [],
-                createdAt: new Date('2025-04-28'),
-            }
-        ];
-        await db.collection('posts').insertMany(posts);
-        console.log(`📝 Seeded ${posts.length} travel posts\n`);
-
-        // ── COMMENTS ──────────────────────────────────────────────────────
-        const comments = [
-            {
-                postId: POST_1_ID.toString(),
-                userId: PROVIDER_ID.toString(),
-                userName: 'Md. Karim Hossain',
-                userPhotoURL: 'https://api.dicebear.com/7.x/adventurer/svg?seed=karim',
-                text: 'Sylhet is magical! I drive tourists there all the time. The Lawachara rainforest is also unmissable if you\'re in the area. 🌿',
-                createdAt: new Date('2025-03-11'),
-            },
-            {
-                postId: POST_1_ID.toString(),
-                userId: TRAVELER_ID.toString(),
-                userName: 'Aryan Rahman',
-                userPhotoURL: 'https://api.dicebear.com/7.x/adventurer/svg?seed=aryan',
-                text: 'Thank you! Yes Lawachara was incredible — saw some hoolock gibbons! 🐒',
-                createdAt: new Date('2025-03-11'),
-            },
-            {
-                postId: POST_2_ID.toString(),
-                userId: PROVIDER_ID.toString(),
-                userName: 'Md. Karim Hossain',
-                userPhotoURL: 'https://api.dicebear.com/7.x/adventurer/svg?seed=karim',
-                text: 'I can arrange a comfortable ride to Cox\'s Bazar! DM me for rates 🚗',
-                createdAt: new Date('2025-04-03'),
-            },
-            {
-                postId: POST_3_ID.toString(),
-                userId: PROVIDER_ID.toString(),
-                userName: 'Md. Karim Hossain',
-                userPhotoURL: 'https://api.dicebear.com/7.x/adventurer/svg?seed=karim',
-                text: 'The Sundarbans tour is on my bucket list. Did you take a guided boat tour?',
-                createdAt: new Date('2025-04-21'),
-            },
-        ];
-        await db.collection('comments').insertMany(comments);
-        console.log(`💬 Seeded ${comments.length} comments\n`);
-
-        // ── VEHICLES ──────────────────────────────────────────────────────
-        const vehicles = [
-            {
-                _id: VEHICLE_1_ID,
-                providerId: PROVIDER_ID.toString(),
-                name: 'Toyota Noah (7-Seater)',
-                type: 'Microbus',
-                seats: 7,
-                ac: true,
-                pricePerDay: 4500,
-                image: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600',
-                status: 'available',
-                createdAt: new Date('2025-02-10'),
-            },
-            {
-                _id: VEHICLE_2_ID,
-                providerId: PROVIDER_ID.toString(),
-                name: 'Toyota Hiace (11-Seater)',
-                type: 'Minivan',
-                seats: 11,
-                ac: true,
-                pricePerDay: 7000,
-                image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600',
-                status: 'available',
-                createdAt: new Date('2025-02-15'),
-            }
-        ];
-        await db.collection('vehicles').insertMany(vehicles);
-        console.log(`🚗 Seeded ${vehicles.length} vehicles for provider\n`);
-
-        // ── TRIP REQUESTS ──────────────────────────────────────────────────
-        const tripRequests = [
-            {
-                _id: OPEN_REQ_ID,
-                travelerId: TRAVELER_ID.toString(),
-                destination: 'Sylhet',
-                dates: 'Jun 10–15',
-                groupSize: '4',
-                budget: '15000',
-                vehicleType: 'Microbus',
-                description: 'Tea garden tour, Ratargul swamp forest, Jaflong. Need AC vehicle.',
-                itinerary: '• Day 1: Arrive Sylhet, check-in, local market\n• Day 2: Tea estates tour (Malnicherra, Lakkatura)\n• Day 3: Ratargul Swamp Forest boat ride\n• Day 4: Jaflong, Bichanakandi\n• Day 5: Shrine of Shah Jalal, return journey',
-                status: 'open',
-                createdAt: new Date('2025-05-01'),
-            },
-            {
-                _id: BOOKED_REQ_ID,
-                travelerId: TRAVELER_ID.toString(),
-                destination: "Cox's Bazar",
-                dates: 'Apr 20–24',
-                groupSize: '6',
-                budget: '25000',
-                vehicleType: 'Minivan',
-                description: 'Beach trip, Himchari, Saint Martin island ferry. Family group.',
-                itinerary: '• Day 1: Departure from Dhaka, check-in\n• Day 2: Laboni Beach, Himchari waterfall\n• Day 3: Inani Beach sunrise, Ramu Buddhist temples\n• Day 4: Sunset at Kolatoli, seafood dinner\n• Day 5: Return journey',
-                status: 'booked',
-                bookedOfferId: OFFER_2_ID.toString(),
-                createdAt: new Date('2025-04-05'),
-            },
-            {
-                _id: OPEN_REQ_2_ID,
-                travelerId: TRAVELER_2_ID.toString(),
-                destination: 'Sajek Valley',
-                dates: 'May 15–18',
-                groupSize: '2',
-                budget: '10000',
-                vehicleType: 'Sedan',
-                description: 'Looking for a reliable car from Khagrachari to Sajek and back.',
-                itinerary: '• Day 1: Arrive Khagrachari, head to Sajek\n• Day 2: Explore Sajek\n• Day 3: Return',
-                status: 'open',
-                createdAt: new Date('2025-05-02'),
-            }
-        ];
-        await db.collection('tripRequests').insertMany(tripRequests);
-        console.log(`🗺️  Seeded ${tripRequests.length} trip requests (1 open, 1 booked)\n`);
-
-        // ── RENTAL OFFERS ──────────────────────────────────────────────────
-        const rentalOffers = [
-            {
-                _id: OFFER_1_ID,
-                requestId: OPEN_REQ_ID.toString(),
-                providerId: PROVIDER_ID.toString(),
-                vehicleId: VEHICLE_1_ID.toString(),
-                vehicleSnapshot: vehicles[0],
-                price: 13500,
-                message: 'Toyota Noah, full AC, experienced driver. I know all the tea estate routes. Can add a local guide at no extra cost!',
-                status: 'pending',
-                providerName: 'Md. Karim Hossain',
-                providerPhoto: 'https://api.dicebear.com/7.x/adventurer/svg?seed=karim',
-                providerVerified: true,
-                createdAt: new Date('2025-05-02'),
-            },
-            {
-                _id: OFFER_2_ID,
-                requestId: BOOKED_REQ_ID.toString(),
-                providerId: PROVIDER_ID.toString(),
-                vehicleId: VEHICLE_2_ID.toString(),
-                vehicleSnapshot: vehicles[1],
-                price: 22000,
-                message: 'Toyota Hiace, 11-seater, full AC. Perfect for your family group. I have done this route 50+ times. Safe and comfortable!',
-                status: 'accepted',
-                providerName: 'Md. Karim Hossain',
-                providerPhoto: 'https://api.dicebear.com/7.x/adventurer/svg?seed=karim',
-                providerVerified: true,
-                createdAt: new Date('2025-04-06'),
-            }
-        ];
-        await db.collection('rentalOffers').insertMany(rentalOffers);
-        console.log(`💰 Seeded ${rentalOffers.length} rental offers (1 pending, 1 accepted)\n`);
-
-        // ── TRIP CHAT ──────────────────────────────────────────────────────
-        const chatMessages = [
-            {
-                requestId: BOOKED_REQ_ID.toString(),
-                senderId: TRAVELER_ID.toString(),
-                senderName: 'Aryan Rahman',
-                text: "Hey Karim bhai! Super excited for the Cox's Bazar trip. What time should we be ready for pickup?",
-                createdAt: new Date('2025-04-06T09:00:00'),
-            },
-            {
-                requestId: BOOKED_REQ_ID.toString(),
-                senderId: PROVIDER_ID.toString(),
-                senderName: 'Md. Karim Hossain',
-                text: 'Assalamu Alaikum! Plan is to depart at 6:00 AM sharp to avoid Dhaka morning traffic. I\'ll arrive 10 minutes early, don\'t worry. 🚗',
-                createdAt: new Date('2025-04-06T09:15:00'),
-            },
-            {
-                requestId: BOOKED_REQ_ID.toString(),
-                senderId: TRAVELER_ID.toString(),
-                senderName: 'Aryan Rahman',
-                text: 'Perfect! We will all be ready by 5:50 AM. Can you also stop at Padma bridge viewing point on the way?',
-                createdAt: new Date('2025-04-06T09:20:00'),
-            },
-            {
-                requestId: BOOKED_REQ_ID.toString(),
-                senderId: PROVIDER_ID.toString(),
-                senderName: 'Md. Karim Hossain',
-                text: 'Of course! I always stop there — great photo spot. The bridge looks amazing in the morning light. See you on the 20th! 🌉',
-                createdAt: new Date('2025-04-06T09:25:00'),
-            }
-        ];
-        await db.collection('tripChat').insertMany(chatMessages);
-        console.log(`💬 Seeded ${chatMessages.length} trip chat messages on the booked trip\n`);
-
-        // ── RATINGS ──────────────────────────────────────────────────────
-        const ratings = [
-            {
-                _id: RATING_ID,
-                travelerId: TRAVELER_ID.toString(),
-                providerId: PROVIDER_ID.toString(),
-                requestId: BOOKED_REQ_ID.toString(),
-                rating: 5,
-                review: "Karim bhai is absolutely the best! Punctual, professional, and the Hiace was spotless with AC at full blast. Stopped at all the spots we asked. Will definitely book again for our next trip! 🌟",
-                createdAt: new Date('2025-04-25'),
-            }
-        ];
-        await db.collection('ratings').insertMany(ratings);
-        console.log(`⭐ Seeded ${ratings.length} rating (5-star)\n`);
-
-        // ── NOTIFICATIONS ──────────────────────────────────────────────────
-        const notifications = [
-            // For traveler: got an offer on open Sylhet trip
-            {
-                recipientId: TRAVELER_ID.toString(),
-                type: 'new_offer',
-                message: 'Md. Karim Hossain sent you an offer for ৳13,500 on your trip to Sylhet',
-                meta: { requestId: OPEN_REQ_ID.toString(), offerId: OFFER_1_ID.toString() },
-                read: false,
-                createdAt: new Date('2025-05-02T08:00:00'),
-            },
-            // For traveler: Karim accepted friend request (sample historical)
-            {
-                recipientId: TRAVELER_ID.toString(),
-                type: 'friend_accepted',
-                message: 'Md. Karim Hossain accepted your friend request',
-                meta: { userId: PROVIDER_ID.toString() },
-                read: true,
-                createdAt: new Date('2025-02-10T10:00:00'),
-            },
-            // For provider: traveler accepted their offer on Cox's Bazar trip
-            {
-                recipientId: PROVIDER_ID.toString(),
-                type: 'offer_accepted',
-                message: "🎉 Aryan Rahman accepted your offer! Trip to Cox's Bazar is confirmed.",
-                meta: { requestId: BOOKED_REQ_ID.toString() },
-                read: true,
-                createdAt: new Date('2025-04-07T14:00:00'),
-            },
-            // For provider: friend request from traveler
-            {
-                recipientId: PROVIDER_ID.toString(),
-                type: 'friend_request',
-                message: 'Aryan Rahman sent you a friend request',
-                meta: { senderId: TRAVELER_ID.toString() },
-                read: true,
-                createdAt: new Date('2025-02-08T09:00:00'),
-            }
-        ];
-        await db.collection('notifications').insertMany(notifications);
-        console.log(`🔔 Seeded ${notifications.length} notifications\n`);
-
-        // ── Summary ───────────────────────────────────────────────────────
-        console.log('═══════════════════════════════════════════════════');
-        console.log('✅  SEED COMPLETE! Login credentials:');
-        console.log('');
-        console.log('  🧳 TRAVELER');
-        console.log('     Email:    traveler@trippy.com');
-        console.log('     Password: test1234');
-        console.log('     → Has 2 trip requests, 3 posts, 1 unread notification');
-        console.log('');
-        console.log('  🚗 CAR RENTAL PROVIDER');
-        console.log('     Email:    provider@trippy.com');
-        console.log('     Password: test1234');
-        console.log('     → Has 2 vehicles, 2 offers, trip chat messages');
-        console.log('');
-        console.log('  MORE ACCOUNTS (All use password: test1234)');
-        console.log('     - sarah@trippy.com (Traveler)');
-        console.log('     - faiz@trippy.com (Traveler)');
-        console.log('     - jamil@trippy.com (Provider)');
-        console.log('═══════════════════════════════════════════════════\n');
-
-    } catch (err) {
-        console.error('❌ Seed failed:', err);
-    } finally {
-        await client.close();
+    // Drop all
+    for (const c of ['users','posts','comments','vehicles','tripRequests','rentalOffers','ratings','notifications','tripChat','verifications']) {
+      try { await db.collection(c).drop(); } catch {}
     }
+    console.log('🗑️  Cleared\n');
+
+    // ── USERS ──
+    const allUsers = [
+      ...travelers.map(t => ({
+        _id: t.id, name: t.name, email: t.email, password: 'test1234', role: 'traveler',
+        photoURL: AVATAR(t.name.split(' ')[0].toLowerCase()), bio: t.bio,
+        verifyOCR: t.verified, verifiedDocType: t.docType || null,
+        friends: [], friendRequests: [], sentRequests: [], createdAt: new Date('2025-01-15'),
+      })),
+      ...providers.map(p => ({
+        _id: p.id, name: p.name, email: p.email, password: 'test1234', role: 'carRentalUser',
+        photoURL: AVATAR(p.name.split(' ')[0].toLowerCase()), bio: p.bio,
+        verifyOCR: p.verified, verifiedDocType: p.docType || null,
+        friends: [], friendRequests: [], sentRequests: [], createdAt: new Date('2025-02-01'),
+      })),
+    ];
+    // Wire some friendships
+    allUsers[0].friends = [ID('b1'), ID('a2')];
+    allUsers[1].friends = [ID('a1')];
+    allUsers.find(u => u._id.equals(ID('b1'))).friends = [ID('a1')];
+
+    await db.collection('users').insertMany(allUsers);
+    console.log(`👤 Seeded ${allUsers.length} users`);
+
+    // ── POSTS ──
+    const posts = postData.map((p, i) => {
+      const user = allUsers.find(u => u._id.equals(ID(p.uid)));
+      return {
+        _id: new ObjectId(), post_id: new ObjectId().toString(),
+        userId: user._id.toString(), userName: user.name, userPhotoURL: user.photoURL, userVerified: user.verifyOCR,
+        title: p.title, description: p.desc,
+        images: p.imgs.map(id => UNSPLASH(id)),
+        comments: [], createdAt: new Date(Date.now() - (postData.length - i) * 86400000),
+      };
+    });
+    await db.collection('posts').insertMany(posts);
+    console.log(`📝 Seeded ${posts.length} posts`);
+
+    // ── COMMENTS ──
+    const comments = [
+      { postIdx: 0, uid: 'b1', text: 'Sylhet is magical! I drive tourists there all the time 🌿' },
+      { postIdx: 0, uid: 'a2', text: 'Adding this to my bucket list!' },
+      { postIdx: 1, uid: 'b1', text: 'I can arrange a ride to Cox\'s Bazar anytime 🚗' },
+      { postIdx: 3, uid: 'a1', text: 'Old Dhaka biryani is unbeatable!' },
+      { postIdx: 4, uid: 'a4', text: 'I want to do this trek next month!' },
+      { postIdx: 5, uid: 'a2', text: 'Your photos are absolutely stunning 📸' },
+      { postIdx: 8, uid: 'a6', text: 'Bandarban with kids is such a great idea!' },
+      { postIdx: 9, uid: 'b3', text: 'I do this route regularly, gorgeous drive!' },
+    ].map(c => {
+      const user = allUsers.find(u => u._id.equals(ID(c.uid)));
+      return {
+        postId: posts[c.postIdx]._id.toString(), userId: user._id.toString(),
+        userName: user.name, userPhotoURL: user.photoURL, text: c.text,
+        createdAt: new Date(posts[c.postIdx].createdAt.getTime() + 3600000),
+      };
+    });
+    await db.collection('comments').insertMany(comments);
+    console.log(`💬 Seeded ${comments.length} comments`);
+
+    // ── VEHICLES ──
+    const vehicles = vehicleData.map((v, i) => ({
+      _id: ID(`c${i+1}`), providerId: ID(v.pid).toString(),
+      name: v.name, type: v.type, seats: v.seats, ac: v.ac,
+      pricePerDay: v.price, image: UNSPLASH(v.img), status: 'available',
+      createdAt: new Date('2025-02-10'),
+    }));
+    await db.collection('vehicles').insertMany(vehicles);
+    console.log(`🚗 Seeded ${vehicles.length} vehicles`);
+
+    // ── TRIP REQUESTS ──
+    const tripReqs = tripData.map((t, i) => ({
+      _id: ID(`d${i+1}`), travelerId: ID(t.tid).toString(),
+      destination: t.dest, dates: t.dates, groupSize: t.group, budget: t.budget,
+      vehicleType: t.vtype, description: t.desc, status: t.status,
+      createdAt: new Date(Date.now() - (tripData.length - i) * 86400000),
+    }));
+    // Mark the booked one
+    tripReqs[1].bookedOfferId = ID('e2').toString();
+    await db.collection('tripRequests').insertMany(tripReqs);
+    console.log(`🗺️  Seeded ${tripReqs.length} trip requests`);
+
+    // ── OFFERS ──
+    const offers = [
+      { id: ID('e1'), reqIdx: 0, pid: 'b1', vid: 0, price: 13500, msg: 'Full AC, experienced driver. I know all tea estate routes!', status: 'pending' },
+      { id: ID('e2'), reqIdx: 1, pid: 'b1', vid: 1, price: 22000, msg: 'Hiace 11-seater, done this route 50+ times.', status: 'accepted' },
+      { id: ID('e3'), reqIdx: 2, pid: 'b2', vid: 3, price: 8500, msg: 'Honda Civic, comfortable ride for 2.', status: 'pending' },
+      { id: ID('e4'), reqIdx: 3, pid: 'b3', vid: 4, price: 16000, msg: 'Pajero SUV perfect for hill roads.', status: 'pending' },
+      { id: ID('e5'), reqIdx: 4, pid: 'b4', vid: 5, price: 18000, msg: 'H1 Van with experienced hill-road driver.', status: 'pending' },
+    ].map(o => {
+      const prov = allUsers.find(u => u._id.equals(ID(o.pid)));
+      return {
+        _id: o.id, requestId: tripReqs[o.reqIdx]._id.toString(),
+        providerId: prov._id.toString(), vehicleId: vehicles[o.vid]._id.toString(),
+        vehicleSnapshot: vehicles[o.vid], price: o.price, message: o.msg, status: o.status,
+        providerName: prov.name, providerPhoto: prov.photoURL, providerVerified: prov.verifyOCR,
+        createdAt: new Date(),
+      };
+    });
+    await db.collection('rentalOffers').insertMany(offers);
+    console.log(`💰 Seeded ${offers.length} offers`);
+
+    // ── CHAT on booked trip ──
+    const chat = [
+      { sid: 'a1', name: 'Aryan Rahman',   text: "Hey! Super excited for Cox's Bazar. What time for pickup?" },
+      { sid: 'b1', name: 'Karim Hossain',  text: "Assalamu Alaikum! 6 AM sharp. I'll be 10 min early 🚗" },
+      { sid: 'a1', name: 'Aryan Rahman',   text: "Can we stop at Padma Bridge viewing point?" },
+      { sid: 'b1', name: 'Karim Hossain',  text: "Of course! Great photo spot. See you on the 20th! 🌉" },
+    ].map((m, i) => ({
+      requestId: tripReqs[1]._id.toString(),
+      senderId: ID(m.sid).toString(), senderName: m.name, text: m.text,
+      createdAt: new Date(Date.now() - (4 - i) * 300000),
+    }));
+    await db.collection('tripChat').insertMany(chat);
+    console.log(`💬 Seeded ${chat.length} chat messages`);
+
+    // ── RATINGS ──
+    await db.collection('ratings').insertOne({
+      travelerId: ID('a1').toString(), providerId: ID('b1').toString(),
+      requestId: tripReqs[1]._id.toString(), rating: 5,
+      review: 'Karim bhai is the best! Punctual, professional, spotless vehicle. 🌟',
+      createdAt: new Date(),
+    });
+    console.log('⭐ Seeded 1 rating');
+
+    // ── NOTIFICATIONS ──
+    const notifs = [
+      { to: 'a1', type: 'new_offer', msg: 'Karim Hossain sent you an offer for ৳13,500 on Sylhet trip', read: false },
+      { to: 'a1', type: 'friend_accepted', msg: 'Sarah Chowdhury accepted your friend request', read: true },
+      { to: 'b1', type: 'offer_accepted', msg: "🎉 Aryan accepted your offer! Cox's Bazar confirmed.", read: true },
+      { to: 'a2', type: 'new_offer', msg: 'Jamil Rent-A-Car sent you an offer for ৳8,500 on Sajek trip', read: false },
+      { to: 'a4', type: 'new_offer', msg: 'Rahim Transport sent you an offer for ৳16,000 on Bandarban trip', read: false },
+      { to: 'a6', type: 'new_offer', msg: 'Dhaka Car Rentals sent you an offer for ৳18,000 on Rangamati trip', read: false },
+    ].map(n => ({
+      recipientId: ID(n.to).toString(), type: n.type, message: n.msg,
+      meta: {}, read: n.read, createdAt: new Date(),
+    }));
+    await db.collection('notifications').insertMany(notifs);
+    console.log(`🔔 Seeded ${notifs.length} notifications`);
+
+    // ── SUMMARY ──
+    console.log('\n══════════════════════════════════════════════');
+    console.log('✅ SEED COMPLETE — All passwords: test1234\n');
+    console.log('TRAVELERS (10):');
+    travelers.forEach(t => console.log(`  📧 ${t.email}`));
+    console.log('\nPROVIDERS (5):');
+    providers.forEach(p => console.log(`  📧 ${p.email}`));
+    console.log('══════════════════════════════════════════════\n');
+
+  } catch (err) {
+    console.error('❌ Seed failed:', err);
+  } finally {
+    await client.close();
+  }
 }
 
 seed();

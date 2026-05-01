@@ -756,6 +756,34 @@ app.post('/trip-chat/:requestId', async (req, res) => {
 });
 
 // ==========================================
+//  PROFILE UPDATE
+// ==========================================
+
+// Update profile photo / bio
+app.patch('/update-profile/:userId', async (req, res) => {
+    const { photoURL, bio, name } = req.body;
+    try {
+        const updates = {};
+        if (photoURL !== undefined) updates.photoURL = photoURL;
+        if (bio !== undefined) updates.bio = bio;
+        if (name !== undefined) updates.name = name;
+
+        await usersCollection.updateOne(
+            { _id: new ObjectId(req.params.userId) },
+            { $set: updates }
+        );
+        const updated = await usersCollection.findOne(
+            { _id: new ObjectId(req.params.userId) },
+            { projection: { password: 0 } }
+        );
+        res.json(updated);
+    } catch (error) {
+        console.error('Profile update error:', error);
+        res.status(500).json({ message: 'Error updating profile' });
+    }
+});
+
+// ==========================================
 //  START SERVER
 // ==========================================
 

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Map, Car, CheckCircle, Tag, Plus, Send, MessageCircle } from 'lucide-react';
+import { Map, Car, CheckCircle, Tag, Plus, Send, MessageCircle, Camera } from 'lucide-react';
 import TripChatModal from './TripChatModal';
 
 const ProviderDashboard = () => {
@@ -18,6 +18,17 @@ const ProviderDashboard = () => {
 
     // Garage Form State
     const [newVehicle, setNewVehicle] = useState({ name: '', type: 'Sedan', seats: 4, ac: true, pricePerDay: '', image: '' });
+    const [vehicleImageBase64, setVehicleImageBase64] = useState('');
+    const vehicleImgRef = useRef(null);
+
+    const handleVehicleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) { alert('Image must be under 2MB'); return; }
+        const reader = new FileReader();
+        reader.onloadend = () => setVehicleImageBase64(reader.result);
+        reader.readAsDataURL(file);
+    };
 
     useEffect(() => {
         if (user) {
@@ -47,9 +58,14 @@ const ProviderDashboard = () => {
     const handleAddVehicle = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:3000/vehicles', { ...newVehicle, providerId: user._id });
+            await axios.post('http://localhost:3000/vehicles', {
+                ...newVehicle,
+                image: vehicleImageBase64 || newVehicle.image,
+                providerId: user._id
+            });
             fetchVehicles();
             setNewVehicle({ name: '', type: 'Sedan', seats: 4, ac: true, pricePerDay: '', image: '' });
+            setVehicleImageBase64('');
             alert('Vehicle added to garage!');
         } catch (error) {
             alert('Failed to add vehicle');
@@ -191,7 +207,23 @@ const ProviderDashboard = () => {
                                         <input type="number" placeholder="Seats" className="input input-sm w-full" value={newVehicle.seats} onChange={e => setNewVehicle({ ...newVehicle, seats: e.target.value })} required />
                                         <input type="number" placeholder="Rent/Day (Tk)" className="input input-sm w-full" value={newVehicle.pricePerDay} onChange={e => setNewVehicle({ ...newVehicle, pricePerDay: e.target.value })} required />
                                     </div>
-                                    <input type="text" placeholder="Image URL" className="input input-sm w-full" value={newVehicle.image} onChange={e => setNewVehicle({ ...newVehicle, image: e.target.value })} />
+                                    {/* Vehicle image upload */}
+                                    <div className="form-control">
+                                        <div
+                                            className="border-2 border-dashed border-white/10 rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/30 transition-colors"
+                                            onClick={() => vehicleImgRef.current?.click()}
+                                        >
+                                            {vehicleImageBase64 ? (
+                                                <img src={vehicleImageBase64} alt="Preview" className="h-28 w-full object-cover rounded-lg" />
+                                            ) : (
+                                                <>
+                                                    <Camera size={28} className="text-base-content/20" />
+                                                    <p className="text-xs text-base-content/30">Click to upload vehicle photo</p>
+                                                </>
+                                            )}
+                                        </div>
+                                        <input ref={vehicleImgRef} type="file" accept="image/*" className="hidden" onChange={handleVehicleImageChange} />
+                                    </div>
                                     <label className="label cursor-pointer justify-start gap-2">
                                         <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={newVehicle.ac} onChange={e => setNewVehicle({ ...newVehicle, ac: e.target.checked })} />
                                         <span className="label-text">AC Available</span>
