@@ -1,3 +1,4 @@
+import API_BASE from '../../api';
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -39,7 +40,7 @@ const ProviderDashboard = () => {
 
     const fetchVehicles = async () => {
         try {
-            const res = await axios.get(`http://localhost:3000/vehicles/${user._id}`);
+            const res = await axios.get(`${API_BASE}/vehicles/${user._id}`);
             setVehicles(res.data);
         } catch (error) {
             console.error("Error fetching vehicles:", error);
@@ -48,7 +49,7 @@ const ProviderDashboard = () => {
 
     const fetchLeads = async () => {
         try {
-            const res = await axios.get('http://localhost:3000/trip-requests/open');
+            const res = await axios.get(`${API_BASE}/trip-requests/open`);
             setLeads(res.data);
         } catch (error) {
             console.error("Error fetching leads:", error);
@@ -58,7 +59,7 @@ const ProviderDashboard = () => {
     const handleAddVehicle = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:3000/vehicles', {
+            await axios.post(`${API_BASE}/vehicles`, {
                 ...newVehicle,
                 image: vehicleImageBase64 || newVehicle.image,
                 providerId: user._id
@@ -75,7 +76,7 @@ const ProviderDashboard = () => {
     const handleDeleteVehicle = async (id) => {
         if (!confirm('Remove this vehicle?')) return;
         try {
-            await axios.delete(`http://localhost:3000/vehicles/${id}`);
+            await axios.delete(`${API_BASE}/vehicles/${id}`);
             fetchVehicles();
         } catch (error) {
             alert('Failed to delete vehicle');
@@ -95,7 +96,7 @@ const ProviderDashboard = () => {
 
     const submitBid = async () => {
         try {
-            await axios.post('http://localhost:3000/rental-offers', {
+            await axios.post(`${API_BASE}/rental-offers`, {
                 requestId: selectedLead._id,
                 providerId: user._id,
                 vehicleId: selectedVehicleId,

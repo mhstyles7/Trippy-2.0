@@ -7,10 +7,27 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-app.use(cors());
+// CORS — allow Vercel frontend + local dev
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:4173',
+    process.env.FRONTEND_URL, // e.g. https://trippy-2.vercel.app
+].filter(Boolean);
+
+app.use(cors({
+    origin: (origin, cb) => {
+        // Allow requests with no origin (mobile apps, curl, Render health checks)
+        if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+        cb(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+}));
 app.use(express.json({ limit: '50mb' })); // Large limit for base64 images
+
+// Health check (for Render)
+app.get('/health', (req, res) => res.json({ status: 'ok', ts: new Date() }));
 
 const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri, {

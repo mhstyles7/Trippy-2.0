@@ -1,3 +1,4 @@
+import API_BASE from '../../api';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Plus, Send, Sparkles, MessageCircle } from 'lucide-react';
@@ -30,7 +31,7 @@ const TravelerDashboard = () => {
 
     const fetchMyRequests = async () => {
         try {
-            const res = await axios.get(`http://localhost:3000/trip-requests/my/${user._id}`);
+            const res = await axios.get(`${API_BASE}/trip-requests/my/${user._id}`);
             setMyRequests(res.data);
             // Fetch offers for each open request
             res.data.forEach(req => {
@@ -43,7 +44,7 @@ const TravelerDashboard = () => {
 
     const fetchOffers = async (requestId) => {
         try {
-            const res = await axios.get(`http://localhost:3000/rental-offers/request/${requestId}`);
+            const res = await axios.get(`${API_BASE}/rental-offers/request/${requestId}`);
             setOffers(prev => ({ ...prev, [requestId]: res.data }));
         } catch (error) {
             console.error("Error fetching offers:", error);
@@ -53,7 +54,7 @@ const TravelerDashboard = () => {
     const handlePostRequest = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:3000/trip-requests', { ...newRequest, travelerId: user._id });
+            await axios.post(`${API_BASE}/trip-requests`, { ...newRequest, travelerId: user._id });
             fetchMyRequests();
             setNewRequest({ destination: '', dates: '', groupSize: '', budget: '', vehicleType: 'Microbus', description: '' });
             alert('Trip Request Posted! Providers will bid soon.');
@@ -64,7 +65,7 @@ const TravelerDashboard = () => {
 
     const handleOfferResponse = async (offerId, status) => {
         try {
-            await axios.post('http://localhost:3000/rental-offers/respond', { offerId, status });
+            await axios.post(`${API_BASE}/rental-offers/respond`, { offerId, status });
             fetchMyRequests(); // Refresh status
             alert(`Offer ${status}!`);
         } catch (error) {
@@ -99,7 +100,7 @@ const TravelerDashboard = () => {
     const submitRating = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:3000/ratings', {
+            await axios.post(`${API_BASE}/ratings`, {
                 travelerId: user._id,
                 ...ratingData
             });

@@ -1,3 +1,4 @@
+import API_BASE from '../../api';
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +19,7 @@ export default function Friends() {
 	const fetchSuggestions = async () => {
 		setLoading(true);
 		try {
-			const res = await axios.get(`http://localhost:3000/friend-suggestions/${userId}`);
+			const res = await axios.get(`${API_BASE}/friend-suggestions/${userId}`);
 			setSuggestions(res.data);
 		} catch (err) {
 			setErrorMessage("Error fetching suggestions");
@@ -29,7 +30,7 @@ export default function Friends() {
 
 	const fetchReceivedRequests = async () => {
 		try {
-			const res = await axios.get(`http://localhost:3000/received-requests/${userId}`);
+			const res = await axios.get(`${API_BASE}/received-requests/${userId}`);
 			setReceivedRequests(res.data);
 		} catch (err) {
 			setErrorMessage("Error fetching received requests");
@@ -38,7 +39,7 @@ export default function Friends() {
 
 	const fetchSentRequests = async () => {
 		try {
-			const res = await axios.get(`http://localhost:3000/sent-requests/${userId}`);
+			const res = await axios.get(`${API_BASE}/sent-requests/${userId}`);
 			setSentRequests(res.data);
 		} catch (err) {
 			setErrorMessage("Error fetching sent requests");
@@ -47,7 +48,7 @@ export default function Friends() {
 
 	const fetchFriends = async () => {
 		try {
-			const res = await axios.get(`http://localhost:3000/friends/${userId}`);
+			const res = await axios.get(`${API_BASE}/friends/${userId}`);
 			setFriends(res.data);
 		} catch (err) {
 			setErrorMessage("Error fetching friends");
@@ -56,7 +57,7 @@ export default function Friends() {
 
 	const sendFriendRequest = async (receiverId) => {
 		try {
-			await axios.post("http://localhost:3000/friend-request", { senderId: userId, receiverId });
+			await axios.post(`${API_BASE}/friend-request`, { senderId: userId, receiverId });
 			setSuccessMessage("Friend request sent!");
 			fetchSuggestions();
 			fetchSentRequests();
@@ -67,7 +68,7 @@ export default function Friends() {
 
 	const acceptRequest = async (senderId) => {
 		try {
-			await axios.post("http://localhost:3000/accept-request", { userId, senderId });
+			await axios.post(`${API_BASE}/accept-request`, { userId, senderId });
 			setSuccessMessage("Friend request accepted!");
 			fetchReceivedRequests();
 			fetchFriends();
@@ -78,7 +79,7 @@ export default function Friends() {
 
 	const rejectRequest = async (requesterId) => {
 		try {
-			await axios.post("http://localhost:3000/reject-request", { userId, requesterId });
+			await axios.post(`${API_BASE}/reject-request`, { userId, requesterId });
 			setSuccessMessage("Request declined");
 			fetchReceivedRequests();
 		} catch (err) {
@@ -88,7 +89,7 @@ export default function Friends() {
 
 	const removeFriend = async (friendId) => {
 		try {
-			await axios.post("http://localhost:3000/remove-friend", { userId, friendId });
+			await axios.post(`${API_BASE}/remove-friend`, { userId, friendId });
 			setSuccessMessage("Friend removed");
 			fetchFriends();
 		} catch (err) {

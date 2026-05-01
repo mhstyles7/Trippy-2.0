@@ -1,3 +1,4 @@
+import API_BASE from '../../api';
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
@@ -22,7 +23,7 @@ export default function Profile() {
     const fetchUserPosts = async () => {
         setLoading(true);
         try {
-            const res = await axios.get("http://localhost:3000/get-posts");
+            const res = await axios.get(`${API_BASE}/get-posts`);
             const userPosts = res.data.filter(post => post.userId === user._id);
             setPosts(userPosts);
         } catch (error) {
@@ -47,7 +48,7 @@ export default function Profile() {
         reader.onloadend = async () => {
             const base64 = reader.result;
             try {
-                const res = await axios.patch(`http://localhost:3000/update-profile/${user._id}`, {
+                const res = await axios.patch(`${API_BASE}/update-profile/${user._id}`, {
                     photoURL: base64,
                 });
                 const updated = { ...user, photoURL: base64 };

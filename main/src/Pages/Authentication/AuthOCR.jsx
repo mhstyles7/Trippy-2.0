@@ -1,3 +1,4 @@
+import API_BASE from '../../api';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Tesseract from "tesseract.js";
@@ -109,7 +110,7 @@ function AuthOCR() {
       const frontBase64 = await fileToBase64(frontFile);
       const backBase64 = await fileToBase64(backFile);
 
-      const res = await axios.post("http://localhost:3000/verify-ocr", {
+      const res = await axios.post(`${API_BASE}/verify-ocr`, {
         userId: user._id,
         documentType: docType,
         idNumber: idNumber.trim(),

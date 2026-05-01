@@ -1,3 +1,4 @@
+import API_BASE from '../../api';
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { MessageCircle, Send, X, Loader } from 'lucide-react';
@@ -13,7 +14,7 @@ const TripChatModal = ({ requestId, currentUser, destination, onClose }) => {
 
     const fetchMessages = async () => {
         try {
-            const res = await axios.get(`http://localhost:3000/trip-chat/${requestId}`);
+            const res = await axios.get(`${API_BASE}/trip-chat/${requestId}`);
             setMessages(res.data);
         } catch { /* silent */ } finally {
             setLoading(false);
@@ -38,7 +39,7 @@ const TripChatModal = ({ requestId, currentUser, destination, onClose }) => {
         if (!text || sending) return;
         setSending(true);
         try {
-            await axios.post(`http://localhost:3000/trip-chat/${requestId}`, {
+            await axios.post(`${API_BASE}/trip-chat/${requestId}`, {
                 senderId: currentUser._id,
                 senderName: currentUser.name,
                 text,

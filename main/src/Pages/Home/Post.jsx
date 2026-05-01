@@ -1,3 +1,4 @@
+import API_BASE from '../../api';
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -19,7 +20,7 @@ const Post = () => {
 	useEffect(() => {
 		const fetchPost = async () => {
 			try {
-				const response = await axios.get(`http://localhost:3000/get-specific-post/${id}`);
+				const response = await axios.get(`${API_BASE}/get-specific-post/${id}`);
 				setPost(response.data);
 			} catch (err) {
 				setError("Failed to fetch post");
@@ -30,7 +31,7 @@ const Post = () => {
 
 		const fetchComments = async () => {
 			try {
-				const response = await axios.get(`http://localhost:3000/get-comments/${id}`);
+				const response = await axios.get(`${API_BASE}/get-comments/${id}`);
 				setComments(response.data);
 			} catch (err) {
 				setError("Failed to fetch comments");
@@ -45,9 +46,9 @@ const Post = () => {
 		if (!newComment.trim()) return;
 		setCommenting(true);
 		try {
-			await axios.post(`http://localhost:3000/add-comment/${id}`, { userId, text: newComment });
+			await axios.post(`${API_BASE}/add-comment/${id}`, { userId, text: newComment });
 			setNewComment("");
-			const response = await axios.get(`http://localhost:3000/get-comments/${id}`);
+			const response = await axios.get(`${API_BASE}/get-comments/${id}`);
 			setComments(response.data);
 		} catch (error) {
 			setError("Failed to add comment");
@@ -58,7 +59,7 @@ const Post = () => {
 
 	const handleDeletePost = async () => {
 		try {
-			await axios.delete(`http://localhost:3000/remove-post/${id}`);
+			await axios.delete(`${API_BASE}/remove-post/${id}`);
 			navigate("/");
 		} catch (err) {
 			setError("Failed to delete post");

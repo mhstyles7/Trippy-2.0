@@ -1,3 +1,4 @@
+import API_BASE from '../../api';
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Bell, Users, ShoppingBag, CheckCircle, X, BellOff } from 'lucide-react';
@@ -34,7 +35,7 @@ const NotificationBell = () => {
         if (!userId) return;
         const fetchNotifs = async () => {
             try {
-                const res = await axios.get(`http://localhost:3000/notifications/${userId}`);
+                const res = await axios.get(`${API_BASE}/notifications/${userId}`);
                 setNotifications(res.data);
             } catch (e) { /* silent */ }
         };
@@ -57,7 +58,7 @@ const NotificationBell = () => {
     const markRead = async () => {
         if (!userId || unreadCount === 0) return;
         try {
-            await axios.post(`http://localhost:3000/notifications/mark-read/${userId}`);
+            await axios.post(`${API_BASE}/notifications/mark-read/${userId}`);
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
         } catch (e) { /* silent */ }
     };

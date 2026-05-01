@@ -1,3 +1,4 @@
+import API_BASE from '../../api';
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -14,15 +15,15 @@ const Home = () => {
 		const fetchData = async () => {
 			try {
 				const [postsRes, statsRes] = await Promise.all([
-					axios.get("http://localhost:3000/get-posts"),
-					axios.get("http://localhost:3000/site-stats"),
+					axios.get(`${API_BASE}/get-posts`),
+					axios.get(`${API_BASE}/site-stats`),
 				]);
 				setPosts(postsRes.data);
 				setStats(statsRes.data);
 			} catch (error) {
 				// Fallback: at least load posts
 				try {
-					const postsRes = await axios.get("http://localhost:3000/get-posts");
+					const postsRes = await axios.get(`${API_BASE}/get-posts`);
 					setPosts(postsRes.data);
 				} catch {}
 			} finally {

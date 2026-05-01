@@ -1,3 +1,4 @@
+import API_BASE from '../../api';
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -27,7 +28,7 @@ const Explore = () => {
     const fetchResults = async (q) => {
         setLoading(true);
         try {
-            const res = await axios.get(`http://localhost:3000/search`, {
+            const res = await axios.get(`${API_BASE}/search`, {
                 params: { q, type: 'all' }
             });
             const data = res.data;

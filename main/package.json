@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "server": "node server.js",
     "server:watch": "nodemon server.js",
-    "seed": "node seed.js"
+    "seed": "node seed.js",
+    "start": "node server.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

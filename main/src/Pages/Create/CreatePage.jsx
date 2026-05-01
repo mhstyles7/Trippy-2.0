@@ -1,3 +1,4 @@
+import API_BASE from '../../api';
 import React, { useState } from "react";
 import axios from "axios";
 import { AlertCircle, CheckCircle, Camera, Trash2, Plus, Send } from "lucide-react";
@@ -47,7 +48,7 @@ export default function CreatePage() {
 		setSuccessMessage("");
 
 		try {
-			await axios.post("http://localhost:3000/create-post", {
+			await axios.post(`${API_BASE}/create-post`, {
 				userId,
 				title,
 				description,

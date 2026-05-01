@@ -1,3 +1,4 @@
+import API_BASE from '../../api';
 import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthProvider";
@@ -20,7 +21,7 @@ const Login = () => {
 		const credentials = { email, password };
 
 		try {
-			const res = await axios.post("http://localhost:3000/login", credentials);
+			const res = await axios.post(`${API_BASE}/login`, credentials);
 			if (res.status === 200) {
 				loginUser(res.data);
 				if (res.data.verifyOCR !== true) {
@@ -66,18 +67,18 @@ const Login = () => {
 						let userData;
 						// Try login first, then signup if not found
 						try {
-							const loginRes = await axios.post("http://localhost:3000/login", {
+							const loginRes = await axios.post(`${API_BASE}/login`, {
 								email: payload.email,
 								password: payload.sub, // Use Google ID as password
 							});
 							userData = loginRes.data;
 						} catch {
 							// User doesn't exist — create account
-							await axios.post("http://localhost:3000/signup", {
+							await axios.post(`${API_BASE}/signup`, {
 								...googleUser,
 								password: payload.sub,
 							});
-							const loginRes = await axios.post("http://localhost:3000/login", {
+							const loginRes = await axios.post(`${API_BASE}/login`, {
 								email: payload.email,
 								password: payload.sub,
 							});

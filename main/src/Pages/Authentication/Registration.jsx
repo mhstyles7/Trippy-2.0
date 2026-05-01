@@ -1,3 +1,4 @@
+import API_BASE from '../../api';
 import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
@@ -39,7 +40,7 @@ const Registration = () => {
         const credentials = { email, password, photoURL, name, role };
 
         try {
-            const res = await axios.post('http://localhost:3000/signup', credentials);
+            const res = await axios.post(`${API_BASE}/signup`, credentials);
             if (res.status === 201 || res.status === 200) {
                 navigate("/login");
             } else {
