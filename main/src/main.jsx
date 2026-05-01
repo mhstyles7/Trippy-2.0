@@ -15,6 +15,7 @@ import Profile from "./Pages/Profile/Profile";
 import ProviderDashboard from "./Pages/Marketplace/ProviderDashboard";
 import TravelerDashboard from "./Pages/Marketplace/TravelerDashboard";
 import PrivateRoute from "./Pages/Authentication/PrivateRoute";
+import Explore from "./Pages/Explore/Explore";
 const router = createBrowserRouter([
 	{
 		path: "/",
@@ -59,6 +60,10 @@ const router = createBrowserRouter([
 			{
 				path: "/traveler-dashboard",
 				element: <PrivateRoute><TravelerDashboard></TravelerDashboard></PrivateRoute>,
+			},
+			{
+				path: "/explore",
+				element: <Explore></Explore>,
 			},
 		],
 	},

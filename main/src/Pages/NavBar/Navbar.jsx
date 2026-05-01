@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, LogIn, UserPlus, Users, PenSquare, ShoppingBag, Car, User, IdCard, CheckCircle, LogOut } from "lucide-react";
+import { Home, LogIn, UserPlus, Users, PenSquare, ShoppingBag, Car, User, IdCard, CheckCircle, LogOut, Compass } from "lucide-react";
 
 // eslint-disable-next-line react/prop-types
 const Navbar = ({ isSidebar = false }) => {
@@ -30,6 +30,7 @@ const Navbar = ({ isSidebar = false }) => {
 	const navItems = (
 		<>
 			<li><NavLink to="/" className={linkClass}><Home size={18} /> Home</NavLink></li>
+			<li><NavLink to="/explore" className={linkClass}><Compass size={18} /> Explore</NavLink></li>
 			{!isLoggedIn && (
 				<>
 					<li><NavLink to="/login" className={linkClass}><LogIn size={18} /> Login</NavLink></li>

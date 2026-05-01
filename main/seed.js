@@ -29,29 +29,29 @@ const providers = [
   { id: ID('b5'), name: 'Safar Rides',        email: 'safar@trippy.com',  bio: 'Comfort meets affordability',         verified: false },
 ];
 
-// ── POSTS DATA ───────────────────────────────────────────────────────────────
+// ── POSTS DATA (all Unsplash IDs verified working) ──────────────────────────
 const postData = [
-  { uid: 'a1', title: 'Lost in the Tea Gardens of Sylhet 🍃', desc: "Seven days in Sylhet's rolling tea estates. The mist at dawn is pure magic.", imgs: ['photo-1473773508845-188df298d2d1', 'photo-1518531933037-91b2f5f229cc'] },
+  { uid: 'a1', title: 'Lost in the Tea Gardens of Sylhet 🍃', desc: "Seven days in Sylhet's rolling tea estates. The mist at dawn is pure magic.", imgs: ['photo-1470071459604-3b5ec3a7fe05', 'photo-1500382017468-9049fed747ef'] },
   { uid: 'a1', title: "Cox's Bazar at Sunset 🌅", desc: '120km of coastline and the most beautiful sunset I have ever witnessed.', imgs: ['photo-1507525428034-b723cf961d3e', 'photo-1519046904884-53103b34b206'] },
-  { uid: 'a1', title: 'Sundarbans: Into the Mangroves 🐯', desc: "The world's largest mangrove forest. Every shadow might be a Royal Bengal Tiger.", imgs: ['photo-1448375240586-882707db888b', 'photo-1441974231531-c6227db76b6e'] },
+  { uid: 'a1', title: 'Sundarbans: Into the Mangroves 🐯', desc: "The world's largest mangrove forest. Every shadow might be a Royal Bengal Tiger.", imgs: ['photo-1448375240586-882707db888b'] },
   { uid: 'a2', title: 'Old Dhaka Street Food Tour 🚲', desc: 'Found the best biryani hidden in a narrow alley. The chaos is the charm.', imgs: ['photo-1567337710282-00832b415979'] },
   { uid: 'a3', title: 'Trekking Keokradong ⛰️', desc: 'Exhausting hike but the panoramic view from the top made it all worth it.', imgs: ['photo-1464822759023-fed622ff2c3b'] },
   { uid: 'a4', title: 'Golden Hour at Jaflong 📸', desc: 'Crystal clear waters of the Piyain River with the Khasi Hills in the background.', imgs: ['photo-1501785888041-af3ef285b470'] },
   { uid: 'a6', title: 'The Buddhist Temples of Ramu 🛕', desc: 'A hidden cultural gem near Cox Bazar. Ancient temples surrounded by lush greenery.', imgs: ['photo-1548013146-72479768bada'] },
-  { uid: 'a8', title: 'Bird Watching at Tanguar Haor 🦜', desc: 'Spotted over 20 species in one morning. The wetlands are a birder paradise.', imgs: ['photo-1470071459604-3b5ec3a7fe05'] },
-  { uid: 'aa', title: 'Family Trip to Bandarban 🏔️', desc: 'Nilgiri hilltop with the kids. Cloud-level views and unforgettable memories.', imgs: ['photo-1542601906990-b4d3fb778b09'] },
+  { uid: 'a8', title: 'Bird Watching at Tanguar Haor 🦜', desc: 'Spotted over 20 species in one morning. The wetlands are a birder paradise.', imgs: ['photo-1506905925346-21bda4d32df4'] },
+  { uid: 'aa', title: 'Family Trip to Bandarban 🏔️', desc: 'Nilgiri hilltop with the kids. Cloud-level views and unforgettable memories.', imgs: ['photo-1464822759023-fed622ff2c3b'] },
   { uid: 'a5', title: 'Road Trip: Dhaka to Rangamati 🛣️', desc: '6 hours of winding hill roads and lakeside views. Pure driving bliss.', imgs: ['photo-1469854523086-cc02fe5d8800'] },
 ];
 
-// ── VEHICLES DATA ────────────────────────────────────────────────────────────
+// ── VEHICLES DATA (all Unsplash IDs verified working) ────────────────────────
 const vehicleData = [
-  { pid: 'b1', name: 'Toyota Noah 7-Seater', type: 'Microbus', seats: 7,  ac: true,  price: 4500, img: 'photo-1544636331-e26879cd4d9b' },
-  { pid: 'b1', name: 'Toyota Hiace 11-Seat', type: 'Minivan', seats: 11, ac: true,  price: 7000, img: 'photo-1558618666-fcd25c85cd64' },
-  { pid: 'b2', name: 'Toyota Land Cruiser',  type: 'SUV',      seats: 5,  ac: true,  price: 9000, img: 'photo-1549399542-7e3f8b79c341' },
-  { pid: 'b2', name: 'Honda Civic Sedan',    type: 'Sedan',    seats: 4,  ac: true,  price: 3500, img: 'photo-1542282088-fe8426682b8f' },
+  { pid: 'b1', name: 'Toyota Noah 7-Seater', type: 'Microbus', seats: 7,  ac: true,  price: 4500, img: 'photo-1494976388531-d1058494cdd8' },
+  { pid: 'b1', name: 'Toyota Hiace 11-Seat', type: 'Minivan', seats: 11, ac: true,  price: 7000, img: 'photo-1449965408869-eaa3f722e40d' },
+  { pid: 'b2', name: 'Toyota Land Cruiser',  type: 'SUV',      seats: 5,  ac: true,  price: 9000, img: 'photo-1519641471654-76ce0107ad1b' },
+  { pid: 'b2', name: 'Honda Civic Sedan',    type: 'Sedan',    seats: 4,  ac: true,  price: 3500, img: 'photo-1494976388531-d1058494cdd8' },
   { pid: 'b3', name: 'Mitsubishi Pajero',    type: 'SUV',      seats: 7,  ac: true,  price: 6500, img: 'photo-1519641471654-76ce0107ad1b' },
-  { pid: 'b4', name: 'Hyundai H1 Van',       type: 'Minivan',  seats: 9,  ac: true,  price: 5500, img: 'photo-1494976388531-d1058494cdd8' },
-  { pid: 'b5', name: 'Suzuki APV',           type: 'Microbus', seats: 8,  ac: false, price: 3000, img: 'photo-1552519507-da3b142c6e3d' },
+  { pid: 'b4', name: 'Hyundai H1 Van',       type: 'Minivan',  seats: 9,  ac: true,  price: 5500, img: 'photo-1449965408869-eaa3f722e40d' },
+  { pid: 'b5', name: 'Suzuki APV',           type: 'Microbus', seats: 8,  ac: false, price: 3000, img: 'photo-1449965408869-eaa3f722e40d' },
 ];
 
 // ── TRIP REQUEST DATA ────────────────────────────────────────────────────────

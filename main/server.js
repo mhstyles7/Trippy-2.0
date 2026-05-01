@@ -509,15 +509,19 @@ app.get('/trip-requests/open', async (req, res) => {
             .sort({ createdAt: -1 })
             .toArray();
 
-        // Enrich with traveler info
-        const enhancedRequests = await Promise.all(requests.map(async (req) => {
-            const traveler = await usersCollection.findOne({ _id: new ObjectId(req.travelerId) });
-            return {
-                ...req,
-                travelerName: traveler?.name || 'Unknown',
-                travelerPhoto: traveler?.photoURL,
-                travelerVerified: traveler?.verifyOCR
-            };
+        // Enrich with traveler info (safe ObjectId handling)
+        const enhancedRequests = await Promise.all(requests.map(async (r) => {
+            try {
+                const traveler = await usersCollection.findOne({ _id: new ObjectId(r.travelerId) });
+                return {
+                    ...r,
+                    travelerName: traveler?.name || 'Unknown',
+                    travelerPhoto: traveler?.photoURL || '',
+                    travelerVerified: traveler?.verifyOCR || false,
+                };
+            } catch {
+                return { ...r, travelerName: 'Unknown', travelerPhoto: '', travelerVerified: false };
+            }
         }));
 
         res.json(enhancedRequests);
@@ -525,6 +529,57 @@ app.get('/trip-requests/open', async (req, res) => {
         res.status(500).json({ message: 'Error fetching requests' });
     }
 });
+
+// ==========================================
+//  SEARCH ENDPOINT (for Explore page)
+// ==========================================
+app.get('/search', async (req, res) => {
+    const { q = '', type = 'all' } = req.query;
+    const regex = q ? new RegExp(q, 'i') : null;
+
+    try {
+        const results = {};
+
+        if (type === 'all' || type === 'posts') {
+            const postFilter = regex ? {
+                $or: [{ title: regex }, { description: regex }, { userName: regex }]
+            } : {};
+            results.posts = await postsCollection.find(postFilter).sort({ createdAt: -1 }).limit(50).toArray();
+        }
+
+        if (type === 'all' || type === 'people') {
+            const peopleFilter = regex ? {
+                $or: [{ name: regex }, { bio: regex }, { email: regex }]
+            } : {};
+            results.people = await usersCollection
+                .find(peopleFilter, { projection: { password: 0 } })
+                .limit(50)
+                .toArray();
+        }
+
+        if (type === 'all' || type === 'trips') {
+            const tripFilter = { status: 'open', ...(regex ? {
+                $or: [{ destination: regex }, { description: regex }]
+            } : {}) };
+            const trips = await db.collection('tripRequests').find(tripFilter).sort({ createdAt: -1 }).limit(50).toArray();
+            // Enrich with traveler name
+            results.trips = await Promise.all(trips.map(async (t) => {
+                try {
+                    const traveler = await usersCollection.findOne({ _id: new ObjectId(t.travelerId) });
+                    return { ...t, travelerName: traveler?.name || 'Unknown', travelerPhoto: traveler?.photoURL || '' };
+                } catch {
+                    return { ...t, travelerName: 'Unknown', travelerPhoto: '' };
+                }
+            }));
+        }
+
+        res.json(results);
+    } catch (error) {
+        console.error('Search error:', error);
+        res.status(500).json({ message: 'Search failed' });
+    }
+});
+
 
 // Get my requests (For Traveler)
 app.get('/trip-requests/my/:userId', async (req, res) => {
@@ -780,6 +835,18 @@ app.patch('/update-profile/:userId', async (req, res) => {
     } catch (error) {
         console.error('Profile update error:', error);
         res.status(500).json({ message: 'Error updating profile' });
+    }
+});
+
+// ==========================================
+//  GET ALL USERS (for explore/search)
+// ==========================================
+app.get('/get-users', async (req, res) => {
+    try {
+        const users = await usersCollection.find({}, { projection: { password: 0 } }).toArray();
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching users' });
     }
 });
 
