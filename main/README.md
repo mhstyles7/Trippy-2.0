@@ -1,8 +1,19 @@
-# React + Vite
+# Trippy 2.0 — App Source
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the main application directory. See the [root README](../README.md) for full documentation, features, and deployment details.
 
-Currently, two official plugins are available:
+## Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+# Install dependencies
+npm install
+
+# Run backend (port 3000)
+npm run server:watch
+
+# Run frontend (port 5173)
+npm run dev
+
+# Seed the database
+npm run seed
+```

@@ -2,6 +2,32 @@
 
 Trippy 2.0 is a modern, full-stack travel marketplace and social community platform. It connects travelers with car rental providers, combining a social feed with a real-time bidding engine, AI tools, live maps, and a dual messaging system — friend DMs and in-trip coordination chat.
 
+## 🌐 Live Deployment
+
+| Service | URL |
+|---|---|
+| **Frontend** (Vercel) | https://trippy-2-0.vercel.app |
+| **Backend API** (Render) | https://trippy-2-0.onrender.com |
+
+> **Note:** The backend runs on Render's free tier. The first request after inactivity may take 30–60 seconds to wake the server up.
+
+---
+
+## ⚙️ Production Environment Variables
+
+### Vercel (Frontend)
+| Variable | Description |
+|---|---|
+| `VITE_API_URL` | Backend URL: `https://trippy-2-0.onrender.com` |
+| `VITE_GEMINI_API_KEY` | Google Gemini API key |
+| `VITE_GOOGLE_CLIENT_ID` | Google OAuth Client ID |
+
+### Render (Backend)
+| Variable | Description |
+|---|---|
+| `MONGO_URI` | MongoDB Atlas connection string |
+| `FRONTEND_URL` | Vercel frontend URL (optional, CORS handles `*.vercel.app` automatically) |
+
 ---
 
 ## ✨ Features
