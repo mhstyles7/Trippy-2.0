@@ -9,17 +9,26 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// CORS — allow Vercel frontend + local dev
-const allowedOrigins = [
-    'http://localhost:5173',
-    'http://localhost:4173',
-    process.env.FRONTEND_URL, // e.g. https://trippy-2.vercel.app
-].filter(Boolean);
-
+// CORS — allow Vercel frontend + local dev (robust: accepts any *.vercel.app domain)
 app.use(cors({
     origin: (origin, cb) => {
         // Allow requests with no origin (mobile apps, curl, Render health checks)
-        if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+        if (!origin) return cb(null, true);
+
+        // Always allow localhost dev servers
+        if (origin.startsWith('http://localhost:')) return cb(null, true);
+
+        // Always allow any Vercel preview/production domain
+        if (origin.endsWith('.vercel.app')) return cb(null, true);
+
+        // Always allow any Render domain
+        if (origin.endsWith('.onrender.com')) return cb(null, true);
+
+        // Also allow the explicit FRONTEND_URL env var (if set)
+        if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL.replace(/\/+$/, '')) {
+            return cb(null, true);
+        }
+
         cb(new Error('Not allowed by CORS'));
     },
     credentials: true,
