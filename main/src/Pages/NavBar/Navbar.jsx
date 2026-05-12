@@ -30,7 +30,6 @@ const Navbar = ({ isSidebar = false }) => {
 	const navItems = (
 		<>
 			<li><NavLink to="/" className={linkClass}><Home size={18} /> Home</NavLink></li>
-			<li><NavLink to="/explore" className={linkClass}><Compass size={18} /> Explore</NavLink></li>
 			{!isLoggedIn && (
 				<>
 					<li><NavLink to="/login" className={linkClass}><LogIn size={18} /> Login</NavLink></li>
@@ -39,6 +38,7 @@ const Navbar = ({ isSidebar = false }) => {
 			)}
 			{isLoggedIn && (
 				<>
+					<li><NavLink to="/explore" className={linkClass}><Compass size={18} /> Explore</NavLink></li>
 					<li><NavLink to="/friends" className={linkClass}><Users size={18} /> Friends</NavLink></li>
 					<li><NavLink to="/create" className={linkClass}><PenSquare size={18} /> Create</NavLink></li>
 					<li>

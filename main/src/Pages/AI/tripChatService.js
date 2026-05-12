@@ -8,7 +8,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
 
-const MODEL_SEQUENCE = ["gemini-2.0-flash", "gemini-2.0-flash-lite"];
+const MODEL_SEQUENCE = ["gemini-2.5-flash", "gemini-2.5-pro"];
 let currentModelIndex = 0;
 
 const getModel = (index) => genAI.getGenerativeModel({ model: MODEL_SEQUENCE[index] });
