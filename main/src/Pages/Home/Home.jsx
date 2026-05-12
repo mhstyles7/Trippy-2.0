@@ -69,7 +69,7 @@ const Home = () => {
 	return (
 		<div className="min-h-screen">
 			{/* Hero Section */}
-			<section className="relative overflow-hidden px-4 py-20 md:py-32 lg:py-40">
+			<section className="relative overflow-hidden px-4 pt-4 pb-24 md:pt-10 md:pb-32 lg:pt-12 lg:pb-40">
 				<div className="floating-blob bg-primary w-96 h-96 top-[-10%] left-[-5%]"></div>
 				<div className="floating-blob bg-secondary w-80 h-80 top-[20%] right-[-5%] animation-delay-2000"></div>
 				<div className="floating-blob bg-accent w-72 h-72 bottom-[-10%] left-[30%] animation-delay-4000"></div>
